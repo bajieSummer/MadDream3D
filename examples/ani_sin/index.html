@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <style>
+            .ws{
+                position: relative; 
+                background-color: antiquewhite; 
+                
+                text-align: center;
+                width: 10%;height:100%;
+                margin-left: 30px;
+            };
+        </style>
+    </head>
+    <body>
+    <div style="position: fixed; top:20px; left:10px;width:100%;
+    height:10%; ">
+        <select id="aniS" class="ws">
+            <!-- <option value="ani1">ani1</option>
+            <option value="ani2">ani2</option> -->
+    </select> 
+    <button id ="playUi" class="ws">PlayAni</button> 
+    <button id ="pauseUi" class="ws" >PauseAni</button> 
+    </div>
+    
+    <canvas id = "sipc" width = "964" height="535">
+    </canvas>
+    </body>
+    <script src ="../../md_3dlib/math.js"></script>
+    <script src ="../../md_3dlib/anime.js"></script>
+    <script src="../../md_core/MathUtil.js"></script>
+    <script src="../../md_core/Transform.js"></script>
+    <script src="../../md_core/Camera.js"></script>
+    <script src="../../md_core/VertexBuffer.js"></script>
+    <script src="../../md_core/Mesh.js"></script>
+    <script src="../../md_core/MeshUtil.js"></script>
+    <script src="../../md_core/Program.js"></script>
+    <script src ="../../md_core/Material.js"></script>
+    <script src ="../../md_core/MaterialUtil.js"></script>
+    <script src="../../md_core/Render.js"></script>
+    <script src="../../md_core/Pass.js"></script>
+    <script src="../../md_core/Entity.js"></script>
+    <script src ="../../md_core/Animation.js"></script>
+    <script src ="../../md_core/Scene.js"></script>
+    <script src ="../../md_shader/simple_shader.js"></script>
+    <script src ="main.js"></script>
+    <script src ="UI.js"></script>
+    <!-- <script src="webgl-demo.js"></script> -->
+</html>
