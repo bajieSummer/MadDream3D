@@ -10,12 +10,12 @@ I'm still working on it. (features, functions)
 Any suggests or tips please email me. (bajie615@126.com)
 
 ## Requirements 
-WEBGL1.0 or Higher
+   WEBGL1.0 or Higher
 
 Usage
-step1: download or pull code and resources
-step2: run a http server (node server1.js)
-step3: check examples
+   step1: download or pull code and resources
+   step2: run a http server (node server1.js)
+   step3: check examples
 
 ## sample codes:
     var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
