@@ -17,7 +17,7 @@ RGBEParser.prototype = {
 
 	constructor: function(type){
 	
-		console.log("constructor");
+		//console.log("constructor");
 		
 	},
 

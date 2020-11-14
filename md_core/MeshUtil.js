@@ -37,12 +37,12 @@ class MeshUtil{
         /**@type {Camera} */cam,
         color){
         var a = Math.PI*cam.fov/360.0;
-        console.log(cam.fov,a);
+       // console.log(cam.fov,a);
         var height = 2.0*Math.tan(a)*cam.near;
         var width = height*cam.asp;
         var z = -cam.near;
         //+cam.transform.pos.z
-        console.log("createCameraPlane:::",width,height,z);
+       // console.log("createCameraPlane:::",width,height,z);
         return MeshUtil.createColorPlane(width,height,color,z);
     }
 
@@ -393,7 +393,7 @@ class MeshUtil{
         var posArr = [];
         var indices = [];
         var vT = [];
-        console.log("rows>>>>>columns>>>",rows,columns);
+       // console.log("rows>>>>>columns>>>",rows,columns);
         for (var i=0; i<rows;i++){
             // map lon from 0-1 to 0 to PI
             var lat = i/(rows-1);

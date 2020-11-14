@@ -140,7 +140,7 @@ class Program{
         }
         const shaderProgram = gl.createProgram();
        // console.log("vertexShader::>>",vsSource);
-        console.log("fragmentShader::>>",fsSource);
+        //console.log("fragmentShader::>>",fsSource);
         gl.attachShader(shaderProgram,vs);
         gl.attachShader(shaderProgram,fs);
         gl.linkProgram(shaderProgram);

@@ -68,10 +68,10 @@ class CameraUtil{
         cam.renderMask =RenderMask.layers;
         cam.addRenderLayer(RenderLayer.default);
         cam.transform.setPosition(lightPos.x,lightPos.y,lightPos.z);
-        console.log("sum Simulator>>Debug1:rot> pos>",cam.transform.rot,cam.transform.pos);
+       // console.log("sum Simulator>>Debug1:rot> pos>",cam.transform.rot,cam.transform.pos);
  
         cam.transform.lookAt(0,0,0);
-        console.log("sum Simulator>>Debug: rot> pos>",cam.transform.rot,cam.transform.pos);
+        //console.log("sum Simulator>>Debug: rot> pos>",cam.transform.rot,cam.transform.pos);
         return cam;
     }
 }

@@ -25,7 +25,7 @@ class TextureMgr  {
                     for(var i=0; i<matList.length; i++){
                         matList[i].onTexLoaded(tex);
                     }
-                    console.log("TextureMgr tex finished loaded url = "+tex.url);
+                   ("TextureMgr tex finished loaded url = "+tex.url);
                 }
                 tex.onLoaded(tex);
             }
