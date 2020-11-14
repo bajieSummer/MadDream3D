@@ -27,9 +27,8 @@ step3: check examples
     var enti1 =SceneUtil.createEntity(ds.scene,"box",
       {mesh:smesh,receiveLight:false,receiveShadow:false,
          texture0:baseUrl});
-
-   ds.scene.addEntity(enti1);
-   ds.draw();
+    ds.scene.addEntity(enti1);
+    ds.draw();
 
 
 
