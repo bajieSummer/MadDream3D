@@ -378,8 +378,9 @@ var OBJParser = function () {
 
 		},
 
-		parse: function (scene, text ) {
-
+		parse: function (scene, text,isMesh) {
+			var isM = false;
+			if (isMesh !== undefined) isM = isMesh;
 			var state = new ParserState();
 
 			if ( text.indexOf( '\r\n' ) !== - 1 ) {
@@ -631,26 +632,31 @@ var OBJParser = function () {
 				var mesh = Mesh.createFromArray(geometry.vertices.length/3.0,geometry.vertices,geometry.colors);
 				mesh.vertexNormal = geometry.normals;
 				mesh.uv = geometry.uvs; 
+				
 				mesh.setPrimitiveType(PrimitiveType.Triangular);
 
 				// Create materials
 
 				var createdMaterials = [];
+				if(!isM){
+					for ( var mi = 0, miLen = materials.length; mi < miLen; mi ++ ) {
 
-				for ( var mi = 0, miLen = materials.length; mi < miLen; mi ++ ) {
-
-					var sourceMaterial = materials[ mi ];
-					var materialHash = sourceMaterial.name + '_' + sourceMaterial.smooth + '_' + hasVertexColors;
-					var material = state.materials[ materialHash ];
-					//material.color
-					//material.map
-					createdMaterials.push( material );
+						var sourceMaterial = materials[ mi ];
+						var materialHash = sourceMaterial.name + '_' + sourceMaterial.smooth + '_' + hasVertexColors;
+						var material = state.materials[ materialHash ];
+						//material.color
+						//material.map
+						createdMaterials.push( material );
+					}
+	
+					var enti = SceneUtil.createEntity(scene,object.name,{
+						mesh:mesh,receiveLight:true,
+					});
+					container.push( enti );
+				}else{
+					container.push(mesh);
 				}
-
-				var enti = SceneUtil.createEntity(scene,object.name,{
-					mesh:mesh,receiveLight:true,
-				});
-				container.push( enti );
+				
 
 			}
 

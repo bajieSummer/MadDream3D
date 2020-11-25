@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <style>
+            .ws{
+                position: relative; 
+                background-color: antiquewhite; 
+                
+                text-align: center;
+                width: 20%;height:80%;
+                margin-left: 30px;
+            };
+            /* Mouse-over effects */
+.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+        </style>
+    </head>
+    <body>
+       
+     <!-- <image  src="../pics/memorial.hdr"></image> -->
+       <canvas id = "sipc" 
+    style="position: fixed; top:0px; left:0px;width:512px;
+    height:512px; " width="512" height="512">
+    </canvas>
+    
+    <select id="slectMat" style=" position: fixed; left:2px; background-color: bisque;" >
+      <option value ="gold">gold</option>
+      <option value ="grass">grass</option>
+      <option value ="steelplate1">steelplate</option>
+      <option value ="streaked-metal1">streaked-metal</option>
+      <option value ="rusted_iron">rusted-iron</option>
+      <option value ="wall">wall</option>
+      <option value ="modern-brick1">brick</option>
+      <option value ="plastic">plastic</option>
+      <option value ="ornate-brass3">ornate-brass</option>
+      <option value ="white">white</option>
+      <option value = "slipperystonework">slipperystone</option>
+      <option value = "dirty-wicker-weave1">dirty-wicker-weave</option>
+      
+   </select>
+
+   <select id="slectSkyBox" style=" position: fixed;left:150px; background-color: bisque;" >
+    <option value ="pisaHDR">defaultSkyBox</option>
+    <option value ="Brooklyn_Bridge.hdr">brooklyn_bridge</option>
+    <option value ="env.hdr">env</option>
+    <option value ="Tropical_Beach.hdr">tropical_beach</option>
+    <option value = "Tropical_Beach_Env.hdr">beach_env</option>
+ </select>
+    <div class="slidecontainer"  style="background-color: bisque;position:fixed;right:0px;width:35%
+    ">
+    <h>metal</h>
+        <input type="range" min="0.0" max="100.0" value="0.0" class="slider" id="myRange">
+    <h>rough</h>
+        <input type="range" min="0.0" max="100.0" value="0.0" class="slider" id="myRange2">
+        <h>exposure</h>
+        <input type="range" min="1.0" max="100.0" value="0.0" class="slider" id="sp1_exposure">
+        
+
+      </div>
+    
+  
+    </body>
+    <script src ="../../md_3dlib/math.js"></script>
+    <script src ="../../md_3dlib/anime.js"></script>
+    <script src ="../../md_3dlib/RGBEParser.js"></script>
+    <script src="../../md_3dlib/OBJParser.js"></script>
+    <script src="../../md_core/MathUtil.js"></script>
+    <script src="../../md_core/Transform.js"></script>
+    <script src="../../md_core/Camera.js"></script>
+    <script src="../../md_core/VertexBuffer.js"></script>
+    <script src="../../md_core/Mesh.js"></script>
+    <script src="../../md_core/MeshUtil.js"></script>
+    <script src="../../md_core/Program.js"></script>
+    <script src ="../../md_core/Material.js"></script>
+    <script src ="../../md_core/MaterialUtil.js"></script>
+    <script src ="../../md_core/Texture.js"></script>
+    <script src ="../../md_core/RenderTexture.js"></script>
+    <script src="../../md_core/Render.js"></script>
+    <script src="../../md_core/Pass.js"></script>
+    <script src="../../md_core/Entity.js"></script>
+    <script src ="../../md_core/Animation.js"></script>
+    <script src = "../../md_core/Light.js"></script>
+    <script src ="../../md_core/Scene.js"></script>
+    <script src="../../md_core/Asset.js"></script>
+    <script src="../../md_core/AssetsMgr.js"></script>
+
+    <script src= "../../md_core/LightUtil.js"></script>
+    <script src="../../md_core/SceneUtil.js"></script>
+    <script src="../../md_core/CameraUtil.js"></script>
+    <!-- <script src ="../../md_shader/blinn_light_texture.js"></script> -->
+    <script src="../../md_core/CanvasUtil.js"></script>
+    <script src="../../md_core/InteractUtil.js"></script>
+    <script src ="../../md_shader/built_in_shader.js"></script>
+    <script src ="main.js"></script>
+    <!-- <script src="webgl-demo.js"></script> -->
+</html>

@@ -12,7 +12,7 @@ class CanvasUtil{
         canvas.height = canvas.clientHeight;
         //canvas.addEventListener("touchmove",responseToMouse,false);
         /** @type {WebGLRenderingContext} */
-        var gl = canvas.getContext("webgl");
+        var gl = canvas.getContext("webgl",{antialias:true});
         if (gl === null){
             gl = canvas.getContext("experimental-webgl");
         }

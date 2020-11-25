@@ -8,6 +8,10 @@
 /**@type {Scene}
  * for entity manager
  */
+var FrameState = {
+    BeforeDraw:0,
+    AfterDraw:1
+};
 class Scene {
     constructor(){
         this.cameraList = [];
@@ -21,11 +25,38 @@ class Scene {
         this.ambientLight = new Vector3(0.0,0.0,0.0);
         this.dirLights = [];
         this.pointLights =[];
+        this.onBeforeDrawFrame = [];
+        this.onAfterDrawFrame = [];
+        this._befDrawRunQueue = [];
+        this._aftDrawRunQueue = [];
+    }
+    // func will be called on every frame
+    registerFrameCalls(func,frameState){
+        if(typeof func !== "function"){
+            console.error("wrong parameters: not a function,",func);
+        }
+        if(frameState ===FrameState.AfterDraw){
+            this.onAfterDrawFrame.push(func);
+        }else{
+            this.onBeforeDrawFrame.push(func);
+        }
+    }
+
+    // func will be called on next frame once
+    postFrameRunnable(func,frameState){
+        if(typeof func !== "function"){
+            console.error("wrong parameters: not a function,",func);
+        }
+        if(frameState ===FrameState.AfterDraw){
+            this._aftDrawRunQueue.push(func);
+        }else{
+            this._befDrawRunQueue.push(func);
+        }
     }
 
     update(/**@type {WebGLRenderingContext} */ gl){
         if(this._dirty){
-           
+           //todo
         }
     }
     requireUpdate(){
@@ -222,6 +253,13 @@ class Scene {
         if(gl=== undefined){
             gl = this.gl;
         }
+        for(var fi in this.onBeforeDrawFrame){
+            this.onBeforeDrawFrame[fi]();
+        }
+        while(this._befDrawRunQueue.length>0){
+            this._befDrawRunQueue.shift()();
+        }
+
         // continues to draw without break;
         if(!this._activeDraw){
             this.drawOneFrame(gl);
@@ -231,6 +269,12 @@ class Scene {
                 this.drawOneFrame(gl);
                 this._dirty = false;
             }
+        }
+        for(var ci in this.onAfterDrawFrame){
+            this.onAfterDrawFrame[ci]();
+        }
+        while(this._aftDrawRunQueue.length>0){
+            this._aftDrawRunQueue.shift()();
         }
         var that = this;
         window.requestAnimationFrame(function(timeStamp){
