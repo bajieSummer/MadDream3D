@@ -32,7 +32,7 @@ Any suggests or tips please email me. (bajie615@126.com)
 
 
 ## ScreenShots:
-![red ball](https://github.com/bajieSummer/MadDream3D/blob/main/screenshots/redball.png)
+![red ball](screenshots/redball.png)
 
 
 
