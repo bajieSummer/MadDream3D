@@ -31,7 +31,13 @@ Any suggests or tips please email me. (bajie615@126.com)
     ds.draw();
 
 
-
+## ScreenShots:
+![red ball](screenshots/redball.png)
+![iron ball](screenshots/iron.png)
+![iron3 ball](screenshots/iron3.png)
+![teapot1](screenshots/teapot1.png)
+![teapot3](screenshots/teapot3.png)
+![teapot4](screenshots/teapot4.png)
 
 
 
