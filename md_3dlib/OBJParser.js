@@ -378,7 +378,9 @@ var OBJParser = function () {
 
 		},
 
-		parse: function (scene, text,isMesh) {
+		parse: function (text,params,callBack) {
+			var scene = params.scene;
+			var isMesh = params.isMesh;
 			var isM = false;
 			if (isMesh !== undefined) isM = isMesh;
 			var state = new ParserState();
@@ -659,7 +661,9 @@ var OBJParser = function () {
 				
 
 			}
-
+			if(callBack!==undefined){
+				callBack(container);
+			}
 			return container;
 
 		}

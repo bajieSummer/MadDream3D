@@ -47,42 +47,24 @@ function changeMesh(key,meshDicts,scene,enti){
    meshDicts[key] = {mesh:null,state:-1};
    meshDicts[key].state = 0;
    meshDicts[key].mesh = null;
-   objLoad(path,function(data){
-      var ps =new OBJParser();
-      var ms = ps.parse(scene,data,true);
-      console.log("load mesh>>",key);
+   // objLoad(path,function(data){
+   //    var ps =new OBJParser();
+   //    var ms = ps.parse(data,{scene:scene,isMesh:true});
+   //    console.log("load mesh>>",key);
+   //    meshDicts[key].state = 1;
+   //    meshDicts[key].mesh = ms[0];
+   //    console.log(ms[0]);
+   //    _changeMeshOnNextFrame({mesh:ms[0],key:key},
+   //       scene,enti);
+   // });
+   AssetsMgr.getMgr().load(path,{scene:scene,isMesh:true},function(meshes){
       meshDicts[key].state = 1;
-      meshDicts[key].mesh = ms[0];
-      console.log(ms[0]);
-      _changeMeshOnNextFrame({mesh:ms[0],key:key},
-         scene,enti);
+      meshDicts[key].mesh = meshes[0];
+      _changeMeshOnNextFrame({mesh:meshes[0],key:key},
+                            scene,enti);
    });
 }
 
-function cacheMesh(key,meshDicts,rmesh,scene){
-   if(meshDicts[key]!==null && meshDicts[key]!==undefined){
-      if(meshDicts[key].mesh!=null){
-         rmesh.mesh = meshDicts[key].mesh;
-         rmesh.key = key;
-      }
-      return;
-   }
-   var path ="../pics/models/" +key;
-   meshDicts[key] = {mesh:null,state:-1};
-   meshDicts[key].state = 0;
-   meshDicts[key].mesh = null;
-   objLoad(path,function(data){
-      var ps =new OBJParser();
-      var ms = ps.parse(scene,data,true);
-      console.log("load mesh>>",key);
-      meshDicts[key].state = 1;
-      meshDicts[key].mesh = ms[0];
-      console.log(ms[0]);
-      rmesh.key = key;
-      rmesh.mesh = ms[0];
-   });
-  
-}
 
 function norml(start,end,value){
    if(value<start){
@@ -386,10 +368,9 @@ function initScene(){
 
     var meshSl = document.getElementById("slectMesh");
     ds.meshDicts = {"sphere":{mesh:smesh,state:1}};
-    
+    AssetsMgr.getMgr().registerParser("obj",OBJParser);
     meshSl.addEventListener('change',function(){
       console.log(this.value);
-      //cacheMesh(this.value,ds.scene.meshDicts,rmesh,ds.scene);
       changeMesh(this.value,ds.meshDicts,ds.scene,chooseEnti);
    });
   

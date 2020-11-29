@@ -2,17 +2,14 @@
  * @Author: Sophie
  * @email: bajie615@126.com
  * @Date: 2020-02-08 18:04:07
- * @LastEditTime: 2020-10-28 11:31:15
+ * @LastEditTime: 2020-11-25 11:55:56
  * @Description: file content
  */
-class Asset{
+
+class Asset extends IAsset{
     constructor(url){
+        super(id);
         this.url = url;
-        this.id = Asset.getId();
     }
-    static getId(){
-        Asset.id +=1;
-        return Asset.id;
-    }
+   
 }
-Asset.id = -1;

@@ -14,13 +14,39 @@ var AssetType={
 
 class AssetsMgr{
     constructor(){
-        this.assetsMap = {};
+        this.assetsMap = new Map();
+        this.parsersMap = new Map();
     }
-    createAsset(url,type){
-        if(type === AssetType.Model){
-            var asset = new Asset(url);
+    // createAsset(url,type){
+    //     if(type === AssetType.Model){
+    //         var asset = new Asset(url);
+
+    //     }
+    // }
+    
+    registerParser(extension,classFunc){
+        if(this.parsersMap[extension] !==undefined) {
+            console.warn("the parser for",extension,"already existed");
+            return false;
         }
+        this.parsersMap.set(extension,classFunc);
     }
+
+    unregisterPaser(extension){
+        this.parsersMap.set(extension,undefined);
+    }
+
+    getParser(url){
+        var m = url.split(".");
+        return  this.parsersMap.get(m[m.length-1]);
+    }
+
+    load(url,params,callback){
+        var m = new MacroAsset();
+        m.load(url,params,callback);
+       this.assetsMap.set(m.id,m);
+    }
+
     
     static getMgr(){
         if(AssetsMgr.mgr === null){

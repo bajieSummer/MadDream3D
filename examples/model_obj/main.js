@@ -55,7 +55,7 @@ function initScene(){
    var obju = "../pics/models/plane.obj";
    objLoad(obju,function(data){
          var ps =OBJParser();
-         var cts = ps.parse(ds.scene,data);
+         var cts = ps.parse(data,{scene:ds.scene});
          /**@type {Mesh} */
         for(var i in cts){
            var enti = cts[i];
