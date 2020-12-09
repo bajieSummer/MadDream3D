@@ -24,6 +24,7 @@ class Entity{
         var nent = new Entity(name);
         nent.mesh = this.mesh;
         nent.material = this.material;
+        nent.transform.copyFrom(this.transform);
         //nent.depthMaterial = this.depthMaterial;
         return nent;
     }
