@@ -1,23 +1,52 @@
+<!--
+ * @Author: Sophie
+ * @email: bajie615@126.com
+ * @Date: 2020-10-29 23:06:35
+ * @Description: file content
+-->
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
         <style>
-            .ws{
-                position: relative; 
-                background-color: antiquewhite; 
-                
-                text-align: center;
-                width: 20%;height:80%;
-                margin-left: 30px;
-            };
+            .ww{
+            position: fixed; 
+            top:12px;
+            left:100px;
+    
+            border: 1px solid;
+            border-radius: 5px;
+            background-color: bisque;
+            }
+            
         </style>
     </head>
     <body>
-     <!-- <image  src="../pics/memorial.hdr"></image> -->
        <canvas id = "sipc" 
-    style="position: fixed; top:0px; left:0px;width:100%;
+    style="position: fixed; top:0px; left:0px;width:100%; display:block; 
     height:100%;">
     </canvas>
+    <select id="slt_axis" style="left:10px;"  class="ww" >
+        <option value ="x,1">x+</option>
+        <option value ="x,-1">x-</option>
+        <option value ="z,1">z+</option>
+        <option value ="z,-1">z-</option>
+     </select>
+   
+    <select id="slt_inds" style="left:60px;" class="ww" >
+        <option value ="9">9</option> 
+        <option value ="8">8</option> 
+        <option value ="1">1</option>
+        <option value ="2">2</option>
+        <option value ="3">3</option>
+        <option value ="4">4</option>
+        <option value ="5">5</option>
+        <option value ="6">6</option> 
+        <option value ="7">7</option> 
+     </select>
+  
+     <input class="ww" type="range"  value="20"  id="rg_power">
+     <button style="left:250px" class="ww" 
+      id="btn_hit">HIT ME</button>
   
     </body>
     <script src ="../../md_3dlib/math.js"></script>
@@ -43,10 +72,8 @@
     <script src= "../../md_core/LightUtil.js"></script>
     <script src="../../md_core/SceneUtil.js"></script>
     <script src="../../md_core/CameraUtil.js"></script>
-    <!-- <script src ="../../md_shader/blinn_light_texture.js"></script> -->
     <script src="../../md_core/CanvasUtil.js"></script>
     <script src="../../md_core/InteractUtil.js"></script>
     <script src ="../../md_shader/built_in_shader.js"></script>
     <script src ="main.js"></script>
-    <!-- <script src="webgl-demo.js"></script> -->
 </html>

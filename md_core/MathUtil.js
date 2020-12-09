@@ -124,11 +124,42 @@ class MathUtil{
     static multiplyV3(vec1,vec2){
         if(vec1 instanceof(Vector3) && vec2 instanceof(Vector3)){
             return new Vector3(vec1.x*vec2.x,vec1.y*vec2.y,vec1.z*vec2.z);
-        }else{
+        }{
             console.error("multiplyV3, parameter not Vector3");
             return null;
         }
         
+    }
+    static V3MultiNum(vec3,num){
+        if(vec3 instanceof(Vector3) && typeof(num)==="number"){
+            return new Vector3(vec3.x*num,vec3.y*num,vec3.z*num);
+        }{
+            console.error("V3MutilNum, unidentified parameters",vec3,num);
+            return null;
+        }
+        
+    }
+    static V3ADDV3(args){
+        var res = new Vector3(0,0,0);
+        for(var i = 0; i < arguments.length; i++){
+            if(arguments[i] instanceof Vector3){
+                res.x +=arguments[i].x;
+                res.y +=arguments[i].y;
+                res.z +=arguments[i].z;
+            }else{
+                console.error("V3ADDV3, unsupported parameters",V1,V2);
+                return null;
+            }
+        }
+        return res;
+    }
+    static V3SubV3(V1,V2){
+        if(V1 instanceof Vector3 && V2 instanceof Vector3){
+            return new Vector3(V1.x-V2.x,V1.y-V2.y,V1.z-V2.z);
+        }
+        console.error("V3SubV3, unsupported parameters",V1,V2);
+        return null;
+
     }
     static multiplyMat(mat1,mat2){
         return math.multiply(mat1,mat2);

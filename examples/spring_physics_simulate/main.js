@@ -1,7 +1,7 @@
 /*
  * @Author: Sophie
  * @email: bajie615@126.com
- * @Date: 2020-02-09 21:04:12
+ * @Date: 2020-11-03 21:04:12
  * @Description: file content
  */
 // step1: create boxes first as parent 
@@ -14,7 +14,7 @@
 // step5: update v, pos
 //// 1 unit for 0.05m 
 // 0.2 (draw) -->1unit
-var Dimensions = {unit:0.9,peru:0.5};
+var Dimensions = {unit:0.9,peru:0.5,g:new Vector3(0.0,-9.8,0.0)};
 var STP = {mass:0.02,ks:20,kd:0.2,l0:0.12,isFixed:false};
 
 var SpPhyics = function(pos,v,isFixed,mass,ks,kd,l0){
@@ -66,16 +66,16 @@ function createSpring(pos,scene,unit){
       });
    enti.transform.setPosition(pos.x,pos.y,pos.z);
    // 1 unit for 0.05m 
-   enti.physics = new SpPhyics(draw2Physics(pos),0.0,true);
+   enti.physics = new SpPhyics(draw2Physics(pos),new Vector3(0.0,0.0,0.0),true);
    var entiArr = [enti];
    
    for(var i = 1; i<10; i++){
       var ct = enti.copy("box"+i);
       var d = enti.physics.l0*1.1/Dimensions.peru*unit;
-      ct.transform.translate(0,(-d)*i,0);
+      ct.transform.translate(i*d,(-d)*i,i*d);
       var phPos = draw2Physics(ct.transform.pos);
      // console.log("i=",i," phPos=",phPos," pos=",ct.transform.pos);
-      ct.physics = new SpPhyics(phPos,0.0,false);
+      ct.physics = new SpPhyics(phPos,new Vector3(0.0,0.0,0.0),false);
       entiArr.push(ct);
    }
    return entiArr;
@@ -87,40 +87,48 @@ function updateForces(i,entiArr){
    if(phy.isFixed) return null;
    var phy0 =i>0?entiArr[i-1].physics:null;
    var phy1 =(i+1)<entiArr.length?entiArr[i+1].physics:null;
-   var g = 9.8;
    //(entiArr.length-i)
-   var G = -1.0*phy.mass*g;
+  // var G = -1.0*phy.mass*g;
+  var G = MathUtil.V3MultiNum(Dimensions.g,phy.mass);
    
-   var F_air =-0.5*1.0*1.293*0.001*phy.v*Math.abs(phy.v);
+   var F_air =MathUtil.V3MultiNum(phy.v,-0.5*1.0*1.293*0.01*MathUtil.getLength(phy.v));
    //for up:
-   var upFp = 0.0; var upFd = 0.0;
+   var upFp = new Vector3(0.0,0.0,0.0); var upFd = new Vector3(0.0,0.0,0.0);
    if(phy0!==null){
-      var Xu = phy0.pos.y-phy.pos.y;
-      var lenXu = Math.abs(Xu);
-      upFp =phy0.ks*Xu/lenXu*(lenXu-phy0.l0);
+      var Xu = MathUtil.V3SubV3(phy0.pos,phy.pos);
+      var lenXu = MathUtil.getLength(Xu);
+      upFp =MathUtil.V3MultiNum(Xu,phy0.ks/lenXu*(lenXu-phy0.l0));
       
-      upFd =phy0.kd*(phy0.v-phy.v)*Xu/lenXu;
+     // upFd =phy0.kd*(phy0.v-phy.v)*Xu/lenXu;
+     upFd  = MathUtil.multiplyV3(Xu,MathUtil.V3SubV3(phy0.v,phy.v));
+     upFd = MathUtil.V3MultiNum(upFd,phy0.kd/lenXu);
    }
-   var dnFp = 0.0; var dnFd = 0.0;
+   var dnFp = new Vector3(0.0,0.0,0.0); var dnFd = new Vector3(0.0,0.0,0.0);
    if(phy1!==null){
-      var Xdn = phy.pos.y-phy1.pos.y;
-      var lenXdn = Math.abs(Xdn);
-      dnFp =-1.0*phy.ks*Xdn/lenXdn*(lenXdn-phy.l0);
-      dnFd =-1.0*phy.kd*(phy.v-phy1.v)*Xdn/lenXdn;
+      var Xdn = MathUtil.V3SubV3(phy.pos,phy1.pos);
+      var lenXdn = MathUtil.getLength(Xdn);
+      //dnFp =-1.0*phy.ks*Xdn/lenXdn*(lenXdn-phy.l0);
+      //dnFd =-1.0*phy.kd*(phy.v-phy1.v)*Xdn/lenXdn;
+      dnFp = MathUtil.V3MultiNum(Xdn,-1.0*phy.ks/lenXdn*(lenXdn-phy.l0));
+      dnFd = MathUtil.multiplyV3(Xdn,MathUtil.V3SubV3(phy.v,phy1.v));
+      dnFd = MathUtil.V3MultiNum(dnFd,-1.0*phy.kd/lenXdn);
+
    }
   // console.log("i=",i," upFp =",upFp, " upFd=",upFd, " dnFp=",dnFp," dnFd=",dnFd," F_air=",F_air);
  
-   return upFp+upFd +dnFp+dnFd+G+F_air;
+   return MathUtil.V3ADDV3(upFp,upFd,dnFp,dnFd,G,F_air);
 }
 
 function updatePosV(dt,F,i,entiArr){
    var phy = entiArr[i].physics;
    if(phy.isFixed) return;
    
-   var a = F/phy.mass;
-   phy.v += a*dt;
-   phy.pos.y +=phy.v*dt;
-   console.log("i=",i," f=",F," a=",a," v=",phy.v," y =",phy.pos.y);
+   var a = MathUtil.V3MultiNum(F,1.0/phy.mass);
+   // phy.v += a*dt;
+   //phy.pos.y +=phy.v*dt; 
+   phy.v = MathUtil.V3ADDV3(phy.v,MathUtil.V3MultiNum(a,dt));
+   phy.pos = MathUtil.V3ADDV3(phy.pos,MathUtil.V3MultiNum(phy.v,dt));
+  // console.log("i=",i," f=",F," a=",a," v=",phy.v," y =",phy.pos);
 }
 
 function updateSpring(dt,spring){
@@ -155,23 +163,6 @@ function initScene(){
       },5);
       var lasttime = null;
     ds.scene.registerFrameCalls(function(){
-      // if(count>50) return;
-      // count ++;
-      // if(lasttime === null){
-      //    lasttime = new Date().getTime();
-      // }else{
-      //    var cur = new Date().getTime();
-      //    var delt = (cur-lasttime)/1000;
-      //    if(delt>=0.00001){
-      //       updateSpring(delt,spr);
-      //       lasttime = cur;
-      //    }
-
-      // }
-      // for(var j=(spr.length-1); j>=0; j--){
-      //    var dp = physics2Draw(spr[j].physics.pos);
-      //    spr[i].transform.setPosition(dp.x,dp.y,dp.z);
-      // }  
 
     },FrameState.BeforeDraw);
    //  ds.scene.ambientLight = new Vector3(0.02,0.02,0.02);
@@ -180,13 +171,35 @@ function initScene(){
    //  lt.color = new Vector3(1.0,1.0,1.0);
    //  lt.specular = new Vector3(1.0,1.0,1.0);
 
-  
-  
+  var slt_ind = document.getElementById("slt_inds");
+  var slt_axis = document.getElementById("slt_axis");
+  var rg_power = document.getElementById("rg_power");
+  document.getElementById("btn_hit").addEventListener("click",function(e){
+      console.log(slt_ind.value);
+      var id = parseInt(slt_ind.value);
+      var axis = slt_axis.value.split(",");
+      var anp = parseInt(axis[1]);
+      var power = parseFloat(rg_power.value);
+      var de = 1.0*0.0014*power*anp/spr[id].physics.mass;
+      var dv =null; 
+      if(axis[0] ==="z"){
+         dv = new Vector3(0,0,de);
+      }else{
+         dv = new Vector3(de,0,0);
+      }
+      spr[id].physics.v =  MathUtil.V3ADDV3(spr[id].physics.v,dv);
+  });
 
     //interaction
    InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
    });
 
+   var pMesh  = MeshUtil.createBox(10,0.2,10);
+   var enti = SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
+      receiveLight:true,receiveShadow:false,matColor:[0.3,0.4,0.4,1.0]
+   });
+   enti.transform.setPosition(0,-1.5,0);
+   ds.scene.addEntity(enti);
    return ds.scene;
 }
 
