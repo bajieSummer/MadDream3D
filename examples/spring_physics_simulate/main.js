@@ -72,7 +72,7 @@ function createSpring(pos,scene,unit){
    for(var i = 1; i<10; i++){
       var ct = enti.copy("box"+i);
       var d = enti.physics.l0*1.1/Dimensions.peru*unit;
-      ct.transform.translate(i*d,(-d)*i,i*d);
+      ct.transform.translate(i*d*0.5,(-d)*i,i*d*0.2);
       var phPos = draw2Physics(ct.transform.pos);
      // console.log("i=",i," phPos=",phPos," pos=",ct.transform.pos);
       ct.physics = new SpPhyics(phPos,new Vector3(0.0,0.0,0.0),false);
@@ -115,7 +115,7 @@ function updateForces(i,entiArr){
 
    }
   // console.log("i=",i," upFp =",upFp, " upFd=",upFd, " dnFp=",dnFp," dnFd=",dnFd," F_air=",F_air);
- 
+   //upFd,,dnFd
    return MathUtil.V3ADDV3(upFp,upFd,dnFp,dnFd,G,F_air);
 }
 
@@ -159,8 +159,8 @@ function initScene(){
     var t2 = window.setInterval(function() {
       // if(count>100) window.clearInterval(t2);
        count ++;
-      updateSpring(0.005,spr);
-      },5);
+      updateSpring(0.01,spr);
+      },10);
       var lasttime = null;
     ds.scene.registerFrameCalls(function(){
 
@@ -175,7 +175,7 @@ function initScene(){
   var slt_axis = document.getElementById("slt_axis");
   var rg_power = document.getElementById("rg_power");
   document.getElementById("btn_hit").addEventListener("click",function(e){
-      console.log(slt_ind.value);
+      //console.log(slt_ind.value);
       var id = parseInt(slt_ind.value);
       var axis = slt_axis.value.split(",");
       var anp = parseInt(axis[1]);

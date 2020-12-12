@@ -16,6 +16,13 @@ function TransformAni(/**@type {Scene} */scene,
     };
     return anime(aniParams);
 }
+function ValueAni(aniParams){
+    var update = aniParams.update;
+    aniParams.update =function(anime){
+        update(anime);
+    };
+    return anime(aniParams);
+}
 
 function MaterialAni(/**@type {Scene} */scene,
     /**@type {Material} */mat,
