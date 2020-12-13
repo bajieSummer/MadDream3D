@@ -1,3 +1,9 @@
+<!--
+ * @Author: Sophie
+ * @email: bajie615@126.com
+ * @Date: 2020-10-29 23:06:35
+ * @Description: file content
+-->
 <html>
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
@@ -49,70 +55,20 @@
     </head>
     <body>
        
-     <!-- <image  src="../pics/memorial.hdr"></image> -->
+
        <canvas id = "sipc" 
     style="position: fixed; top:0px; left:0px;width:512px;
-    height:512px;" width="512" height="512">
+    height:512px; " width="512" height="512">
     </canvas>
     
-    <select id="slectMat" style=" position: fixed; left:2px; background-color: bisque;" >
-      <!-- <option value ="gold">gold</option>
-      <option value ="grass">grass</option>
-      <option value ="steelplate1">steelplate</option>
-      <option value ="streaked-metal1">streaked-metal</option>
-      <option value ="rusted_iron">rusted-iron</option>
-      <option value ="wall">wall</option>
-      <option value ="modern-brick1">brick</option>
-      <option value ="plastic">plastic</option>
-      <option value ="ornate-brass3">ornate-brass</option> -->
-      <option value ="white">white</option>
-      <!-- <option value = "slipperystonework">slipperystone</option>
-      <option value = "dirty-wicker-weave1">dirty-wicker-weave</option>
-       -->
-   </select>
-
-   <select id="slectSkyBox" style=" position: fixed;left:150px; background-color: bisque;" >
-    <option value ="pisaHDR">defaultSkyBox</option>
-    <option value ="Brooklyn_Bridge.hdr">brooklyn_bridge</option>
-    <option value = "Mono_Lake_C_Ref.hdr">mono_lake</option>
-    <option value ="env.hdr">env</option>
-    <option value ="Tropical_Beach.hdr">tropical_beach</option>
-    <option value = "Tropical_Beach_Env.hdr">beach_env</option>
- </select>
-
- <select id="slectMesh" style=" position: fixed;left:280px; background-color: bisque;" >
-  <option value ="sphere">defaultSphere</option>
-  <option value ="plane.obj">plane</option>
-  <option value = "test1.obj">test1</option>
-  <option value = "full_qhc3.obj">teapot</option>
-  <option value ="qin1.obj">qinghuaci</option>
-  <option value = "full_qhc4.obj">teapot2</option>
-
-
-</select>
-
-    <div class="slidecontainer"  style="background-color: bisque;position:fixed;right:0px;width:35%
-    ">
-    <h>metal</h>
-        <input type="range" min="0.0" max="100.0" value="0.0" class="slider" id="myRange">
-    <h>rough</h>
-        <input type="range" min="0.0" max="100.0" value="0.0" class="slider" id="myRange2">
-        <h>exposure</h>
-        <input type="range" min="1.0" max="100.0" value="0.0" class="slider" id="sp1_exposure">
-        
-
-      </div>
+    
     
   
     </body>
     <script src ="../../md_3dlib/math.js"></script>
     <script src ="../../md_3dlib/anime.js"></script>
     <script src ="../../md_3dlib/RGBEParser.js"></script>
-    <script src="../../md_3dlib/OBJParser.js"></script>
     <script src="../../md_core/MathUtil.js"></script>
-    <script src ="../../md_core/IAsset.js"></script>
-    <script src ="../../md_core/MacroAsset.js"></script>
-    <script src ="../../md_core/AssetsMgr.js"></script>
     <script src="../../md_core/Transform.js"></script>
     <script src="../../md_core/Camera.js"></script>
     <script src="../../md_core/VertexBuffer.js"></script>
@@ -136,7 +92,7 @@
     <script src="../../md_core/CanvasUtil.js"></script>
     <script src="../../md_core/InteractUtil.js"></script>
     <script src ="../../md_shader/built_in_shader.js"></script>
-    <script src="../../md_core/IBLUtil.js"></script>
+    <script src ="../../md_core/IBLUtil.js"></script>
     <script src ="main.js"></script>
     <!-- <script src="webgl-demo.js"></script> -->
 </html>

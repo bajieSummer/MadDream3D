@@ -5,20 +5,7 @@
  * @Description: file content
  */
 
-function objLoad(url,callback){
-   //REQUEST FILE
-   var rawFile = new XMLHttpRequest();
-   rawFile.onreadystatechange = function () {
-      if (rawFile.readyState === 4) {
-         if (rawFile.status === 200 || rawFile.status === 0) {
-            var text = rawFile.responseText;
-            callback(text);
-         }
-      }
-   };
-   rawFile.open("GET", url, true);
-   rawFile.send();
-}
+
 
 function _changeMeshOnNextFrame(rmesh,scene,enti){
    scene.postFrameRunnable(function(){
@@ -47,16 +34,6 @@ function changeMesh(key,meshDicts,scene,enti){
    meshDicts[key] = {mesh:null,state:-1};
    meshDicts[key].state = 0;
    meshDicts[key].mesh = null;
-   // objLoad(path,function(data){
-   //    var ps =new OBJParser();
-   //    var ms = ps.parse(data,{scene:scene,isMesh:true});
-   //    console.log("load mesh>>",key);
-   //    meshDicts[key].state = 1;
-   //    meshDicts[key].mesh = ms[0];
-   //    console.log(ms[0]);
-   //    _changeMeshOnNextFrame({mesh:ms[0],key:key},
-   //       scene,enti);
-   // });
    AssetsMgr.getMgr().load(path,{scene:scene,isMesh:true},function(meshes){
       meshDicts[key].state = 1;
       meshDicts[key].mesh = meshes[0];
@@ -83,116 +60,6 @@ function createCubeUrls(pf,et){
    return envMap;
 }
 
-function createCubeCamera(w,h,layer,type){
-   if(type === undefined){
-      type = TextureType.cube;
-   }
-   var rt = new RenderTexture("Camera",w,h,type);
-   rt.elType =TextureElemType.float;
-   rt.hasMipMap =false;
-   var cam = CameraUtil.createDefaultCamera(w/h);
-   var n =0.1;
-   cam.setFov(90);
-   cam.setNear(n);
-   cam.clearColor = [1.0,0.0,0.0,1.0];
-   cam.transform.setPosition(0,0,0);
-   cam.renderTarget = rt;
-   cam.renderMask = RenderMask.layers;
-   cam.addRenderLayer(layer);
-   return cam;
-}
-
-
-function createRenderSphere(params,entiParams){
-   var scene = params.scene;
-   var envCam = params.envCam;
-   var layer = params.layer;
-   var pos = params.pos;
-   var namePrefix = params.namePrefix;
-   var reqCam = params.reqCam;
-   if(namePrefix === undefined){
-      namePrefix = "dft";
-   }
-   if(pos === undefined){
-      pos = new Vector3(0,0,0);
-   }
-   if(layer === undefined || scene === undefined  || envCam === undefined){
-      console.log("we need information of layer, scene, envCam");
-      return;
-   }
-
-
-   var spName = namePrefix +"entity";
-   var sp = SceneUtil.createEntity(scene,spName,entiParams);
-   envCam.name =namePrefix+"Cam";
-   envCam.renderTarget.name=namePrefix+"Tex";
-   sp.material.name= namePrefix+"Mat";
-   sp.finishShot = false;
-   sp.setRenderLayer(layer);
-
-   sp.transform.setPosition(pos.x,pos.y,pos.z);
-  envCam.transform.setPosition(pos.x,pos.y,pos.z);
-  var state = {loaded:false,startShot:false};
- // var noTex = false;
-  if(sp.material.texList.length ===0){
-     noTex = true;
-   }
-//   sp.material.loadedCallBack = function(e){
-//       state.loaded = true;
-//       console.log("material prepared>>>",sp.material.name);
-//   };
-  envCam.afterDrawFunc = function(context,entities){
-     var isLoaded = sp.material.texList.length===0 || sp.material.texPrepared;
-      if(isLoaded&& envCam.renderTarget.type ===TextureType.cube){
-         if(envCam.renderTarget.currentFace ===0){
-            state.startShot = true;
-            console.log("start take shot >>>",envCam.name);
-         }
-         var otherReq = true;
-         if(reqCam !==undefined){
-            otherReq = reqCam.finishShot;
-         }
-         if(otherReq&&state.startShot&&
-            envCam.renderTarget.currentFace === 5){
-               envCam.enable = false;
-              
-               envCam.finishShot = true;
-               envCam.renderTarget.generateMipMap(context);
-               console.log("close camera>>>",envCam.name);
-               if(!MathUtil.isNone(envCam.next)){
-                  envCam.next.enable = true;
-                  
-                  console.log("open camera>>>",envCam.next.name);
-               }
-               // wait for next
-               state.startShot = false;
-               
-         }
-       
-      }
-      if(isLoaded&&envCam.renderTarget.type === TextureType.default){
-         var otherReq2d = true;
-         if(reqCam !==undefined){
-            otherReq2d = reqCam.finishShot;
-         }
-         if(otherReq2d &&state.startShot){
-            envCam.enable = false;
-            envCam.finishShot = true;
-     
-            console.log("close camera>>>",envCam.name);
-            if(!MathUtil.isNone(envCam.next)){
-               envCam.next.enable = true;
-               console.log("open camera>>>",envCam.next.name);
-            }
-         }
-         if(otherReq2d){
-            state.startShot = true;
-         }
-      }
-  };
-  return sp;
-   
-}
 
 function __createPBRMat(scene,key){
      // var folder = "../pics/steelplate1/"; //5
@@ -288,25 +155,18 @@ function initScene(){
     lt.specular = new Vector3(1.0*intes,1.0*intes,1.0*intes);
     var smesh = MeshUtil.createSphere(2.0,100,100,true);
     // step3 : render sphere Hdr to cube
+    ds.scene.envMatDict = {};
+    var envMat = getEnvMat(ds.scene,"pisaHDR",ds.scene.envMatDict);
    var envLayer = RenderLayer.default+2;
-   var cubeCam = createCubeCamera(w,h,envLayer);
-   cubeCam.renderTarget.hasMipMap = true;
-   ds.scene.addCamera(cubeCam);
-
-   ds.scene.envMatDict = {};
-   var envMat = getEnvMat(ds.scene,"pisaHDR",ds.scene.envMatDict);
- var envSphere = createRenderSphere(
-      { scene:ds.scene,envCam:cubeCam,layer:envLayer,namePrefix:"cube"},
-      {mesh:smesh,material:envMat});
-         ds.scene.addEntity(envSphere);
-         ds.scene.currentEnvMap = cubeCam.renderTarget;
+   var cubeCam =IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
+   ds.scene.currentEnvMap = cubeCam.renderTarget;
         
          //add sky
-      var skycube =  MeshUtil.createBox(20,20,20);
-        var sky = SceneUtil.createEntity(ds.scene,"sky",
-         {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
-            cullFace:"FRONT",gammaCorrect:true});
-            ds.scene.addEntity(sky);
+   var skycube =  MeshUtil.createBox(20,20,20);
+   var sky = SceneUtil.createEntity(ds.scene,"sky",
+      {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
+         cullFace:"FRONT",gammaCorrect:true});
+   ds.scene.addEntity(sky);
  
   
 
@@ -374,7 +234,7 @@ function initScene(){
       changeMesh(this.value,ds.meshDicts,ds.scene,chooseEnti);
    });
   
-
+   //changeMesh("full_qhc4.obj",ds.meshDicts,ds.scene,chooseEnti);
     //interaction
    InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        

@@ -1,19 +1,9 @@
 /*
  * @Author: Sophie
  * @email: bajie615@126.com
- * @Date: 2020-02-09 21:04:12
+ * @Date: 2020-11-13 21:04:12
  * @Description: file content
  */
-function norml(start,end,value){
-   if(value<start){
-      return start;
-   }
-   if(value >end){
-      return end;
-   }
-   return value*(end-start)+start;
-}
-
 function createCubeUrls(pf,et){
    var envMap = [pf+"posx"+et,pf+"negx"+et,pf+"posy"+et,
    pf+"negy"+et,pf+"posz"+et,pf+"negz"+et
@@ -39,7 +29,6 @@ function __createPBRMat(scene,key){
    var normalUrl = folder +"normal.png";
    var aoUrl = folder+"ao.png"; 
    var heightUrl = folder+"height.png";
-   var tex = new Texture("Camera",1,1);
    var mat = null;
    if(key === "white"){
          mat = SceneUtil.createMaterial(scene,{receiveLight:true,receiveShadow:false,diffuse:diff,
@@ -56,8 +45,6 @@ function __createPBRMat(scene,key){
        gammaCorrect:true,hdrExposure:1.0,aoMap:aoUrl,
        });
    }
-
-  
    return mat;
 }
 
@@ -103,120 +90,81 @@ function initScene(){
    //step1 default scene
     var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
-    console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
     ds.camera.renderMask = RenderMask.layers;
     ds.camera.addRenderLayer(RenderLayer.default);
-  
-    ds.scene.ambientLight = new Vector3(0.0,0.0,0.0);
+   
     //step2 light
+    ds.scene.ambientLight = new Vector3(0.0,0.0,0.0);
     var lt = ds.dirLight;
     var intes = 0.0;
     lt.color = new Vector3(1.0*intes,1.0*intes,1.0*intes);
     lt.specular = new Vector3(1.0*intes,1.0*intes,1.0*intes);
     var smesh = MeshUtil.createSphere(2.0,100,100,true);
+
     // step3 : render sphere Hdr to cube
-    ds.scene.envMatDict = {};
+   ds.scene.envMatDict = {};
    var envMat = getEnvMat(ds.scene,"Brooklyn_Bridge.hdr",ds.scene.envMatDict);
    var envLayer = RenderLayer.default+2;
-   var cubeCam =IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
+   var cubeCam = IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
    ds.scene.currentEnvMap = cubeCam.renderTarget;
         
-         //add sky
-      var skycube =  MeshUtil.createBox(20,20,20);
-        var sky = SceneUtil.createEntity(ds.scene,"sky",
-         {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
-            cullFace:"FRONT",gammaCorrect:true});
-            ds.scene.addEntity(sky);
- 
-  
-
-
-        cubeCam.next =ds.camera;
-        ds.camera.enable = false;
-       cubeCam.enable = true;
-
-         
+   //add sky
+   var skycube =  MeshUtil.createBox(20,20,20);
+   var sky = SceneUtil.createEntity(ds.scene,"sky",
+      {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
+      cullFace:"FRONT",gammaCorrect:true});
+   ds.scene.addEntity(sky);
       
-      //step5 render sphere to main camera
-
-
-      ds.scene.matDicts = {};
-        var mat = getPBRMat(ds.scene,"plastic",ds.scene.matDicts);
-         var enti2 =SceneUtil.createEntity(ds.scene,"sphere",
-      {mesh:smesh,material:mat
-         });
-         ds.scene.addEntity(enti2);
-
+   //set CameraOrder
+   cubeCam.next =ds.camera;
+   ds.camera.enable = false;
+   cubeCam.enable = true;
 
    
-   // enti1.material.loadedCallBack = function(){
-   //    console.log("material prepared ::>>",enti1.material.name);
-   // };
+   //step5 render object-sphere to main camera
+   ds.scene.matDicts = {};
+   var mat = getPBRMat(ds.scene,"white",ds.scene.matDicts);
+   var enti1 =SceneUtil.createEntity(ds.scene,"sphere",{mesh:smesh,
+               material:mat});
+   ds.scene.addEntity(enti1);
+   enti1.transform.setPosition(-1.3,0,0);
+   enti1.transform.resetScale(0.6,0.6,0.6);
 
-      var chooseEnti =enti2;
-      document.getElementById("myRange").addEventListener("input",function(evt){
-         //console.log(this.value);
-         chooseEnti.material.setUniform("metalness",UTypeEnumn.float,this.value*0.01);
-   
-      });
-      document.getElementById("myRange2").addEventListener("input",function(evt){
-         //console.log(this.value);
-         chooseEnti.material.setUniform("roughness",UTypeEnumn.float,this.value*0.02);
-   
-      });
-      document.getElementById("sp1_exposure").addEventListener("input",function(evt){
-         //console.log(this.value);
-         chooseEnti.material.setUniform("hdrExposure",UTypeEnumn.float,this.value*0.04);
-   
-      });
+   var mat2 = getPBRMat(ds.scene,"gold",ds.scene.matDicts);
+   var enti2 =SceneUtil.createEntity(ds.scene,"sphere",{mesh:smesh,
+               material:mat2});
+   ds.scene.addEntity(enti2);
+   enti2.transform.setPosition(1.3,0,0);
+   enti2.transform.resetScale(0.6,0.6,0.6);
+
       
-      var matSl = document.getElementById("slectMat");
-      matSl.addEventListener('change',function(){
-        //ctxDraw.strokeWidth = (this.value);
-        console.log(this.value);
-        var mat = getPBRMat(ds.scene,this.value,ds.scene.matDicts);
-        enti2.material = mat;
-    });
-
-    var skySl = document.getElementById("slectSkyBox");
-    skySl.addEventListener('change',function(){
-      console.log(this.value);
-      var mat = getEnvMat(ds.scene,this.value,ds.scene.envMatDict);
-      envSphere.material = mat;
-      cubeCam.enable = true;
-      ds.camera.enable = false;
-    });
-  
-
     //interaction
    InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     
-var tf = enti2.transform;
-var m1 = TransformAni(ds.scene,tf,{
-        targets: tf.rot,
-        y: 360,
-        duration: 20000,
-        direction: 'alternate',
-        loop: -1,
-        easing: 'linear',
-        autoplay:true,
-        update: function(anim) {
-        }
-});
+   var tf = enti2.transform;
+   var m1 = TransformAni(ds.scene,tf,{
+         targets: tf.rot,
+         y: 360,
+         duration: 20000,
+         direction: 'alternate',
+         loop: -1,
+         easing: 'linear',
+         autoplay:true,
+         update: function(anim) {
+         }
+   });
 
    return ds.scene;
 }
 
- function main(){
+function main(){
     scene = initScene();
     //scene.enableActiveDraw(true);
     scene.draw();
 }
-
 window.onload = main;
-
 
 
