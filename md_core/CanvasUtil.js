@@ -4,15 +4,19 @@
  * @Date: 2020-02-02 11:13:23
  * @Description: file content
  */
+var Layout = {Default:0,UseOwn:1};
+
 class CanvasUtil{
-    static initCanvas(canvasId){
+    static initCanvas(canvasId,layout){
         // init Canvas
         var canvas = document.getElementById(canvasId);
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+        if(layout===undefined || layout ===Layout.Default){
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
         //canvas.addEventListener("touchmove",responseToMouse,false);
         /** @type {WebGLRenderingContext} */
-        var gl = canvas.getContext("webgl",{antialias:true});
+        var gl = canvas.getContext("webgl",{});
         if (gl === null){
             gl = canvas.getContext("experimental-webgl");
         }

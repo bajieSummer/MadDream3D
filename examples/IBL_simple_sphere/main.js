@@ -88,7 +88,7 @@ function getEnvMat(scene,key,skyMatDict){
 
 function initScene(){
    //step1 default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false,canvasLayout:Layout.UseOwn});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
     ds.camera.renderMask = RenderMask.layers;

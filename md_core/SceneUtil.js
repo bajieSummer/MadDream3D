@@ -177,12 +177,15 @@ class SceneUtil{
         if(sceneParams.hasSkyBox === undefined){
             sceneParams.hasSkyBox = false;
         }
+
        // sceneParams.skyBoxPath
-        var gl = CanvasUtil.initCanvas(canvasId);
-        gl.canvas.width = gl.canvas.clientWidth*1.0;
-        gl.canvas.height = gl.canvas.clientHeight*1.0;
+        var gl = CanvasUtil.initCanvas(canvasId,sceneParams.canvasLayout);
+        
+        //gl.canvas.width = gl.canvas.clientWidth*1.0;
+        //gl.canvas.height = gl.canvas.clientHeight*1.0;
         var w = gl.canvas.width;
         var h = gl.canvas.height;
+        console.log("SceneUtil w==",w,"h==",h);
         gl.viewport(0,0,w,h);
         var scene = new Scene();
         scene.gl = gl;

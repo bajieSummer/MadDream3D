@@ -50,12 +50,13 @@
     <body>
        
      <!-- <image  src="../pics/memorial.hdr"></image> -->
-       <canvas id = "sipc" 
-    style="position: fixed; top:0px; left:0px;width:512px;
-    height:512px;" width="512" height="512">
+ 
+       <canvas id = "sipc"  style=" margin:0 auto; display: block; height:100%"
+     width="1024" height="1024">
     </canvas>
+
     
-    <select id="slectMat" style=" position: fixed; left:2px; background-color: bisque;" >
+    <select id="slectMat" style=" position: fixed; top:20px; left:2px; background-color: bisque;" >
       <!-- <option value ="gold">gold</option>
       <option value ="grass">grass</option>
       <option value ="steelplate1">steelplate</option>
@@ -71,7 +72,7 @@
        -->
    </select>
 
-   <select id="slectSkyBox" style=" position: fixed;left:150px; background-color: bisque;" >
+   <select id="slectSkyBox" style=" position: fixed;top:20px; left:150px; background-color: bisque;" >
     <option value ="pisaHDR">defaultSkyBox</option>
     <option value ="Brooklyn_Bridge.hdr">brooklyn_bridge</option>
     <option value = "Mono_Lake_C_Ref.hdr">mono_lake</option>
@@ -80,7 +81,7 @@
     <option value = "Tropical_Beach_Env.hdr">beach_env</option>
  </select>
 
- <select id="slectMesh" style=" position: fixed;left:280px; background-color: bisque;" >
+ <select id="slectMesh" style=" position: fixed;top:20px; left:280px; background-color: bisque;" >
   <option value ="sphere">defaultSphere</option>
   <option value ="plane.obj">plane</option>
   <option value = "test1.obj">test1</option>
@@ -91,7 +92,7 @@
 
 </select>
 
-    <div class="slidecontainer"  style="background-color: bisque;position:fixed;right:0px;width:35%
+    <div class="slidecontainer"  style="background-color: bisque;position:fixed;top:20px; right:0px;width:35%
     ">
     <h>metal</h>
         <input type="range" min="0.0" max="100.0" value="0.0" class="slider" id="myRange">
@@ -138,5 +139,6 @@
     <script src ="../../md_shader/built_in_shader.js"></script>
     <script src="../../md_core/IBLUtil.js"></script>
     <script src ="main.js"></script>
+    <script src="../../md_helpers/MobileLogger.js"></script>
     <!-- <script src="webgl-demo.js"></script> -->
 </html>

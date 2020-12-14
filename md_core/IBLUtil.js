@@ -126,6 +126,7 @@ static createCubeCamera(w,h,layer,type){
          { scene:scene,envCam:cubeCam,layer:envLayer,namePrefix:"cube_rad"},
          {mesh:smesh,material:envMat});
       scene.addEntity(envSphere);
+      cubeCam.envSphere = envSphere;
       return cubeCam;
    }
 

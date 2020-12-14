@@ -18,6 +18,7 @@ class RenderTexture extends Texture{
     
     loadTexture(/**@type {WebGLRenderingContext} */gl,
         loadCallback){
+            
             if(!this.hasColorBuffer){
                 var ext = gl.getExtension("WEBGL_depth_texture");
                 console.log(ext);
@@ -33,9 +34,13 @@ class RenderTexture extends Texture{
             }
              //gl.bindRenderbuffer(gl.RENDERBUFFER,0);
             this.frameBufferId = gl.createFramebuffer();
+            if(this.elType === TextureElemType.float){
+                var  ext2 = gl.getExtension('WEBGL_color_buffer_float');
+            }
             this.wrap_mode = TextureWrap.default;
             super.loadTexture(gl,loadCallback);
             this.loadAssitColorBuffers(gl);
+
         }
 
     loadAssitColorBuffers(/**@type {WebGLRenderingContext} */gl){
@@ -50,6 +55,7 @@ class RenderTexture extends Texture{
         if(this.type === TextureType.cube){
             texTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X+this.currentFace;
         }
+        
         if(this.assitColorBuffers !==null){
             var ext = gl.getExtension("WEBGL_draw_buffers");
             gl.framebufferTexture2D(gl.FRAMEBUFFER,ext.COLOR_ATTACHMENT0_WEBGL,texTarget,

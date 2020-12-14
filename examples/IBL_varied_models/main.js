@@ -140,7 +140,7 @@ function getEnvMat(scene,key,skyMatDict){
 
 function initScene(){
    //step1 default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false,canvasLayout:Layout.UseOwn});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
@@ -221,7 +221,7 @@ function initScene(){
     skySl.addEventListener('change',function(){
       console.log(this.value);
       var mat = getEnvMat(ds.scene,this.value,ds.scene.envMatDict);
-      envSphere.material = mat;
+      cubeCam.envSphere.material = mat;
       cubeCam.enable = true;
       ds.camera.enable = false;
     });
@@ -257,7 +257,7 @@ var tf = enti2.transform;
 }
 
  function main(){
-    scene = initScene();
+    var scene = initScene();
     //scene.enableActiveDraw(true);
     scene.draw();
 }
