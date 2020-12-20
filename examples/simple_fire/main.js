@@ -10,8 +10,8 @@ function initCanvas(canvasId){
     
      // init Canvas
      var canvas = document.getElementById(canvasId);
-     canvas.width = canvas.clientWidth;
-     canvas.height = canvas.clientHeight;
+    // canvas.width = canvas.clientWidth;
+     //canvas.height = canvas.clientHeight;
      canvas.addEventListener("touchmove",responseToMouse,false);
      /** @type {WebGLRenderingContext} */
      var gl = canvas.getContext("webgl");
@@ -106,7 +106,7 @@ function initScene(){
 
     var scene = new Scene();
     mdg.scene = scene;
-    scene.clearColor = [1.0,1.0,1.0,1.0];
+    //scene.clearColor = [0.2,0.3,0.4,1.0];
     scene.addCamera(cam);
     cam.clearColor = [0.0,0.0,0.0,1.0];
     scene.entityList = ets;

@@ -597,7 +597,10 @@ class MaterialUtil{
                 fdefineStr +="#define DF_LINEARMIP\n";
             }
             if(!MathUtil.isNone(shaderOps.radianceMap)){
-                var rdtex = MaterialUtil.createTextureFromOps(shaderOps.radianceMap,TextureType.cube);
+                var rdtex = MaterialUtil.createTextureFromOps(shaderOps.radianceMap);
+                if(rdtex.type === TextureType.default){
+                    fdefineStr += "#define DF_RADSPMAP\n";
+                }
                 mat.setUniform("radianceMap",UTypeEnumn.texture,rdtex);
                 mat.addTexture(rdtex);
                 
@@ -621,9 +624,11 @@ class MaterialUtil{
                 shaderOps.useUV = true;
                 shaderOps.IBL = true;
                 var ext_lod = scene.gl.getExtension('EXT_shader_texture_lod');
+                
                 var ext_deriv = scene.gl.getExtension('OES_standard_derivatives');
                 if(!MathUtil.isNone(ext_lod)){
                     fdefineStr+="#define DF_TEX_LOD\n";
+                    //alert("lod+",ext_lod);
                 }
                 if(!MathUtil.isNone(ext_deriv)){
                     fdefineStr +="#define DF_DERIVATIVES\n";
@@ -670,13 +675,17 @@ class MaterialUtil{
         var imts= null;
         if(tex instanceof(Texture)){
             imts = tex;
+            
         }else{
             var urimts = tex;
             if(urimts instanceof Array){
                 type = TextureType.cube;
+            }else{
+                type = TextureType.default;
             }
             imts = new Texture(urimts);
             imts.type = type;
+            //imts.type = type;
         }
         // imts.type = type;
         // imts.elType = elType;

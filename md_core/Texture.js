@@ -157,10 +157,10 @@ class Texture{
         
             var level = 0;
             var format = gl.RGBA;
-            
             if(!MathUtil.isNone(tex.format)){
                 format = gl[tex.format];
             }
+            var internalFormat = format;
             var width = tex.width;
             var height = tex.height;
             if(!MathUtil.isNone(fixw)){
@@ -171,6 +171,9 @@ class Texture{
             }
             var eltype = gl[tex.elType];
             var type = gl[tex.type];
+            // if(tex.elType === TextureElemType.float){
+            //     internalFormat = gl.RGB16F;
+            // }
             
             console.log("upload Tex,",tex.elType);
             gl.bindTexture(type,tex.glTexture);
@@ -178,6 +181,9 @@ class Texture{
            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
             if(tex.elType === TextureElemType.float){
                 var ext = gl.getExtension('OES_texture_float');
+                console.log("support >> OES_texture_float",ext);
+                var ext2 = gl.getExtension('OES_texture_float_linear');
+                console.log("support >> OES_texture_float_linear",ext2);
                 tex.wrap_mode =TextureWrap.default;
             }
             //console.log("should flip",isFlip);
@@ -189,12 +195,12 @@ class Texture{
                    // var ke = "TEXTURE_CUBE_MAP_"+tex.cubeMapHint[j];
                   //  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
                     if(data === null){
-                        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,format,width,height,0,format,eltype,null);
+                        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,internalFormat,width,height,0,format,eltype,null);
                     }else{
                         if(data[j] instanceof Image){
-                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,format,format,eltype,data[j]); 
+                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,internalFormat,format,eltype,data[j]); 
                         }else{
-                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,format,width,height,0,format,eltype,data[j]); 
+                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+j,level,internalFormat,width,height,0,format,eltype,data[j]); 
                         }
                     }
                     
@@ -202,10 +208,10 @@ class Texture{
                 }
             }else if(data instanceof Image){
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
-                gl.texImage2D(gl.TEXTURE_2D,level,format,format,eltype,data);
+                gl.texImage2D(gl.TEXTURE_2D,level,internalFormat,format,eltype,data);
             }else{
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
-                gl.texImage2D(gl.TEXTURE_2D,level,format,width,height,0,format,eltype,data); 
+                gl.texImage2D(gl.TEXTURE_2D,level,internalFormat,width,height,0,format,eltype,data); 
             }
             gl.texParameteri(type,gl.TEXTURE_WRAP_S,gl[tex.wrap_mode]);
             gl.texParameteri(type,gl.TEXTURE_WRAP_T,gl[tex.wrap_mode]);
@@ -219,13 +225,14 @@ class Texture{
                 if(et1===undefined || et2===undefined){
                     hasET = false;
                     filter = gl.NEAREST;
+                   alert("not supported");
                 }
             }
             //gl.getExtension('EXT_shader_texture_lod');
             //gl.getExtension('OES_standard_derivatives');
-            gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,filter);
-            gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,filter);
-            
+           // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,filter);
+            //gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,filter);
+         
             if(hasMipMap && tex.hasMipMap){
                 if(MathUtil.isPowerOf2(tex.width) && MathUtil.isPowerOf2(tex.height)){
                    // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.NEAREST_MIPMAP_LINEAR);
@@ -233,14 +240,25 @@ class Texture{
                     if(tex.elType ===TextureElemType.float){
                         if(hasET){
                            // gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                            gl.generateMipmap(type);
-                            gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
-                            console.log("gererate mipmap",tex.name); 
+                          //console.log("errorstate1",gl.getError());
+                           gl.generateMipmap(type);
+                           
+                           if(MDBrowser ==="Chrome"){ //todo
+                             gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_NEAREST);
+                                console.log("Texture>>>>chrome>> use mipmap filter",tex.id);
+                          }else{
+                            gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR); 
+                            // gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+                            // console.log("Texture>>>>not chrome >> liner",tex.id);
+                          }
+
+                          
                         }
                     }else{
                         gl.generateMipmap(type);
                         gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
-                        console.log("gererate mipmap",tex.name); 
+                        console.log("Texture>>>>>not chrome >> 3333",tex.id);
+                     
                     }
                      
                    

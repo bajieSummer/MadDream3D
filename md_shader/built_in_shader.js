@@ -751,6 +751,37 @@ vec3 getIBLIradianceColor(const samplerCube iradMap, float mip,vec3 kS,vec3 wN){
     kD *=1.0 - metal; 
     return kD * iblDiffuse;
 }
+#ifdef DF_RADSPMAP
+const vec2 invAtan = vec2(0.1591,0.3183);
+vec4 sampleSPMap(const sampler2D spMap,vec3 dir,float mip){
+    vec2 uv = vec2(atan(dir.z,dir.x),asin(dir.y));
+    uv *= invAtan;
+    uv += 0.5;
+    #ifdef DF_TEX_LOD
+    return texture2DLodEXT(spMap,uv,mip);
+    #else
+    return texture2D(spMap,uv,mip);
+    #endif
+
+    
+}
+vec4 sampleSPMap2(const sampler2D spMap,vec3 dir,float mip){
+    vec2 uv = vec2(atan(dir.z,dir.x),asin(dir.y));
+    uv *= invAtan;
+    uv += 0.5; 
+    return texture2D(spMap,uv,mip);
+
+    
+}
+vec3 getIBLIradianceColorBySP(const sampler2D iradMap, float mip,vec3 kS,vec3 wN){
+
+    vec3 iblDiffuse = sampleSPMap(iradMap,wN,mip).rgb;
+    vec3 kD = 1.0 - kS;
+    kD *=1.0 - metal; 
+    return kD * iblDiffuse;
+}
+#endif
+
 `;
 
 var fhead_IBL_spec_func=`
@@ -783,7 +814,21 @@ float getSpecRough(vec3 normal,float rf){
     specRough = min( specRough, 1.0 );
     return specRough;
 }
-
+#ifdef DF_RADSPMAP
+vec3 getIBLSpecColorBySP(const sampler2D radMap, float specRough, vec3 R, float nv, vec3 kS,vec2 dfg){
+    
+    #ifdef DF_LINEARMIP
+        float specMip = specRough*MAX_MIPCOUNT;
+    #else
+        float specMip = getSpecularMIPLevel(specRough,MAX_MIPCOUNT-1.0);
+    #endif
+  
+    vec3 iblSpecular =  sampleSPMap(radMap,R,specMip).rgb;
+   
+    
+    return (kS*dfg.x+dfg.y)*iblSpecular;
+}
+#endif
 vec3 getIBLSpecColor(const samplerCube radMap, float specRough, vec3 R, float nv, vec3 kS,vec2 dfg){
     //float mipF = fract(specMip);
     //float mipInt = floor(specMip);
@@ -818,7 +863,11 @@ vec3 kS = fresnelSchlickRoughness(F0,nv,rough);
 #ifdef DF_IRRADIANCEMAP
 vec3 iradColor = getIBLIradianceColor(irradianceMap,0.0,kS,wN);
 #else
+#ifdef DF_RADSPMAP
+vec3 iradColor = getIBLIradianceColorBySP(radianceMap,MAX_MIPCOUNT+1.0,kS,wN);
+#else
 vec3 iradColor = getIBLIradianceColor(radianceMap,MAX_MIPCOUNT+1.0,kS,wN);
+#endif
 #endif
 
 ambient += iradColor*gl_FragColor.rgb*ao;
@@ -834,7 +883,11 @@ var fbody_IBL_iradiance=`
 `;
 
 var fhead_IBL_specular =`
+#ifdef DF_RADSPMAP
+uniform sampler2D radianceMap;
+#else
 uniform samplerCube radianceMap;
+#endif
 #ifdef DF_LUTMAP
 uniform sampler2D  lutMap;
 #endif
@@ -854,7 +907,11 @@ R =  inverseTransformDirection(R,viewMatrix);
 #else
     vec2 dfg = integrateSpecularBRDF(nv,rough);
 #endif
+#ifdef DF_RADSPMAP
+vec3 iblSpecular  = getIBLSpecColorBySP(radianceMap,specRough,R,nv,kS,dfg);
+#else
 vec3 iblSpecular  = getIBLSpecColor(radianceMap,specRough,R,nv,kS,dfg);
+#endif
 float spAo = computeSpecularOcclusion(nv,ao,specRough);
 iblSpecular *= spAo;
 ambient +=iblSpecular;

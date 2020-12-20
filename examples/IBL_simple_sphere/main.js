@@ -104,18 +104,24 @@ function initScene(){
 
     // step3 : render sphere Hdr to cube
    ds.scene.envMatDict = {};
-   var envMat = getEnvMat(ds.scene,"Brooklyn_Bridge.hdr",ds.scene.envMatDict);
+   //Brooklyn_Bridge.hdr pisaHDR room1.png
+   var key = "Brooklyn_Bridge.hdr";
+   var envMat = getEnvMat(ds.scene,key,ds.scene.envMatDict);
    var envLayer = RenderLayer.default+2;
    var cubeCam = IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
    ds.scene.currentEnvMap = cubeCam.renderTarget;
-        
+   //var sp2Map = createCubeUrls("../pics/"+key+"/",".hdr");
+   //var sp2Map ="../pics/sphericalMap/Brooklyn_Bridge.hdr";
+  // ds.scene.currentEnvMap = sp2Map;
    //add sky
-   var skycube =  MeshUtil.createBox(20,20,20);
+  // alert("normal"+ds.scene.gl.getExtension("EXT_texture_filter_anisotropic")+"mozi"+ds.scene.gl.getExtension("MOZ_EXT_texture_filter_anisotropic"));
+    var skycube =  MeshUtil.createBox(20,20,20);
    var sky = SceneUtil.createEntity(ds.scene,"sky",
       {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
       cullFace:"FRONT",gammaCorrect:true});
-   ds.scene.addEntity(sky);
-      
+  ds.scene.addEntity(sky);
+      // var ext = ds.scene.gl.getExtension("EXT_color_buffer_half_float");
+      // alert(ext);
    //set CameraOrder
    cubeCam.next =ds.camera;
    ds.camera.enable = false;

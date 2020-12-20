@@ -4,6 +4,9 @@
  * @Date: 2020-12-13 11:30:29
  * @Description: file content
  */
+
+
+
 class IBLUtil {
 
 
@@ -12,7 +15,13 @@ static createCubeCamera(w,h,layer,type){
        type = TextureType.cube;
     }
     var rt = new RenderTexture("Camera",w,h,type);
-    rt.elType =TextureElemType.float;
+    if(MDBrowser ==="Chrome" || MDBrowser === "Safari"){ //todo Texture filter mipmapLINEAR_MIPMAP_NEAREST
+       console.log("open float map");
+      rt.elType =TextureElemType.float;
+    }
+    //Browser Campatiblity
+    //rt.elType =TextureElemType.float;
+    
     rt.hasMipMap =false;
     var cam = CameraUtil.createDefaultCamera(w/h);
     var n =0.1;
