@@ -18,7 +18,7 @@ var SpPhyics = function (pos,v,isFixed,mass,ks,kd,l0){
     this.l0 = l0===undefined?STP.l0:l0;
     this.isFixed =isFixed ===undefined?STP.isFixed:isFixed;
  };
-class Spring{
+class SlopeSpring{
     constructor(params){
         if(params === undefined){
            params ={};
