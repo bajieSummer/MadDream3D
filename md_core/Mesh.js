@@ -28,6 +28,7 @@ class Mesh{
         this.vertexBufferInfo = null;
         this.dirty = true;
         this.stateDirty = true;
+        this.posDirty = false;
     }
     setPrimitiveType(/**@type {PrimitiveType} */type){
         this.primitiveType = type;
@@ -41,7 +42,25 @@ class Mesh{
             this.stateDirty = false;
         }
     }
+    updateVertexPosByIndex(i,pos){
+        this.vertexPos[i] = pos;
+        this.posDirty = true;
+    }
+    updateAllVertexPos(pos){
+        this.vertexPos = pos;
+        this.vertexCount = pos.length/3;
+        this.posDirty = true;
+    }
     update(/**@type {WebGLRenderingContext} */gl){
+        if(this.posDirty){
+            var bid = this.vertexBufferInfo.vertexPos.id;
+            gl.bindBuffer(gl.ARRAY_BUFFER,bid);
+           // console.log(gl.getError());
+            gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(this.vertexPos),gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER,null);
+            //console.log(gl.getError());
+            this.posDirty = false;
+        }
         if(this.dirty){
             delete this.vertexBufferInfo;
             this.vertexBufferInfo = VertexBuffer.initVertexBuffer(

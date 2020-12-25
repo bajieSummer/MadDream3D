@@ -648,4 +648,14 @@ class MeshUtil{
             
         }
     }
+
+    static createLine(posArr,colorArr){
+
+        var count = posArr.length/3;
+         /**@type {Mesh} */
+         var mesh = Mesh.createFromArray(count,posArr,colorArr);
+         mesh.setPrimitiveType(PrimitiveType.LineStrip);
+         /**@type {Mesh} */
+         return mesh;
+    }
 }
