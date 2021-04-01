@@ -1,0 +1,73 @@
+<!--
+ * @Author: Sophie
+ * @email: bajie615@126.com
+ * @Date: 2020-10-29 23:06:35
+ * @Description: file content
+-->
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <style>
+            .ww{
+            position: fixed; 
+            top:12px;
+            left:100px;
+    
+            border: 1px solid;
+            border-radius: 5px;
+            background-color: bisque;
+            }
+            
+        </style>
+    </head>
+    <body>
+       <canvas id = "sipc" 
+    style="position: fixed; top:0px; left:0px;width:100%; display:block; 
+    height:100%;">
+    </canvas>
+    <select id="slt_axis" style="left:10px;"  class="ww" >
+        <option value ="x,1">x+</option>
+        <option value ="x,-1">x-</option>
+        <option value ="z,1">z+</option>
+        <option value ="z,-1">z-</option>
+     </select>
+  
+     <input class="ww" type="range"  value="20"  id="rg_power">
+     <button style="left:250px" class="ww" 
+      id="btn_hit">HIT ME</button>
+    </body>
+    <button style="left:350px" class="ww" 
+    id="btn_reset">RESET</button>
+  </body>
+    <script src ="../../md_3dlib/math.js"></script>
+    <script src ="../../md_3dlib/anime.js"></script>
+    <script src ="../../md_3dlib/RGBEParser.js"></script>
+    <script src="../../md_core/MathUtil.js"></script>
+    <script src="../../md_core/Transform.js"></script>
+    <script src="../../md_core/Camera.js"></script>
+    <script src="../../md_core/VertexBuffer.js"></script>
+    <script src="../../md_core/Mesh.js"></script>
+    <script src="../../md_core/GridMesh.js"></script>
+    <script src="../../md_core/MeshUtil.js"></script>
+    <script src="../../md_core/Program.js"></script>
+    <script src ="../../md_core/Material.js"></script>
+    <script src ="../../md_core/MaterialUtil.js"></script>
+    <script src ="../../md_core/Texture.js"></script>
+    <script src ="../../md_core/RenderTexture.js"></script>
+    <script src="../../md_core/Render.js"></script>
+    <script src="../../md_core/Pass.js"></script>
+    <script src="../../md_core/Entity.js"></script>
+    <script src ="../../md_core/Animation.js"></script>
+    <script src = "../../md_core/Light.js"></script>
+    <script src ="../../md_core/Scene.js"></script>
+    <script src= "../../md_core/LightUtil.js"></script>
+    <script src="../../md_core/SceneUtil.js"></script>
+    <script src="../../md_core/CameraUtil.js"></script>
+    <script src="../../md_core/CanvasUtil.js"></script>
+    <script src="../../md_core/InteractUtil.js"></script>
+    <script src ="../../md_shader/built_in_shader.js"></script>
+    <script src ="../../md_physics/SlopeSpring.js"></script>
+    <script src="ClothSpring.js"></script>
+    <script src="PhysicalPartice.js"></script>
+    <script src ="main.js"></script>
+</html>

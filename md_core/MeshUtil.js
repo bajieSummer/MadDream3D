@@ -117,6 +117,122 @@ class MeshUtil{
          return mesh;
     }
 
+    static _pushLineIndices(inds,lx1,ly1,lx2,ly2,m,n){
+        if(lx1>=m ||lx2>=m || ly1>=n ||ly2>=n){
+            return;
+        }
+        console.log(lx1*m+ly1,lx2*m+ly2);
+        inds.push(lx1*m+ly1,lx2*m+ly2);
+    }
+
+    static createGridMesh(m,n,width,height,z,hasTangent,isLine=false){
+        var a = 1.0;
+        var b = 1.0;
+        var c = 0.0;
+        m = m===undefined?2:m;
+        n = n===undefined?2:n;
+        if(typeof(width) === "number"){
+            a = width;
+        }
+        if(typeof(height) === "number"){
+            b = height;
+        }
+        if(typeof(z) === "number"){
+            c = z;
+        }
+        var r_sp = b/m;
+        var c_sp = a/n;
+        var left = -a/2.0; var top = -b/2.0; //x,z
+       console.log("space",r_sp,c_sp,m,n);
+        var posArr = [];
+        var uvArr = [];
+        var vertexNormal = [];
+        var vertexTangent = [];
+        var vtn = [0.0,0.0,1.0];
+        for(var i = 0; i <= m; i++){
+            var db = top + r_sp*i;
+            for(var j = 0; j<= n; j++){
+                var da = left + c_sp*j;
+                posArr.push(da,c,db);
+                console.log("posx,posz",da,db);
+                uvArr.push(r_sp*i/a,c_sp*j/b);
+                vertexNormal.push(vtn[0],  vtn[1],  vtn[2]);
+                if(hasTangent){
+                    vertexTangent.push(1.0,  0.0,  0.0);
+                }
+            }
+        }
+        var indices = [];
+        var tm = m+1;
+        if(isLine){
+            for(var id = 0; id < m+1; id++){
+                for(var jd = 0; jd < n+1; jd++){
+                    //id0: i,j  id1 i,j+1
+                    //id0: i,j  id2 i+1,j+1
+                    //id0: i,j  id3 i,j+1 
+                    MeshUtil._pushLineIndices(indices,id,jd,id,jd+1,m+1,n+1);
+                    MeshUtil._pushLineIndices(indices,id,jd,id+1,jd+1,m+1,n+1);
+                    MeshUtil._pushLineIndices(indices,id,jd,id+1,jd,m+1,n+1);
+                }
+            }
+        }else{
+            for(var id = 0; id < m; id++){ 
+                for(var jd = 0; jd < n; jd++){
+                
+                    // id0: i,j,  id1: i+1,j+1 id2: i,j+1, 
+                    // id3: i,j,  id4:i+1,j   id5:i+1,j+1
+                indices.push(id*tm+jd, (id+1)*tm+jd+1,  id*tm+jd+1);
+                indices.push(id*tm+jd, (id+1)*tm+jd, (id+1)*tm+jd+1);
+                                    
+                }
+            }
+        }
+        
+        
+        console.log("indices",indices);
+        
+         /**@type {Mesh} */
+         var mesh = new GridMesh({w:width,h:height,m:m,n:n});
+         mesh.vertexCount = (m+1)*(n+1);
+          mesh.vertexIndices = indices;
+         mesh.vertexPos = posArr;
+         //mesh.vertexColor = colorArr;
+         if(isLine){
+             console.log("isline>>>>>");
+             mesh.setPrimitiveType(PrimitiveType.Line);
+         }else{
+             console.log("triangel>>>>>");
+             mesh.setPrimitiveType(PrimitiveType.Triangular);
+         }
+
+         mesh.uv = uvArr;
+         mesh.vertexNormal = vertexNormal;
+         /**@type {Mesh} */
+ 
+        if(hasTangent){
+            mesh.vertexTangent = vertexTangent;
+        }
+
+         return mesh;
+    }
+
+    static createColorPolygon(colors,indices,posArr){
+        // var uvArr =[
+        //     0.0,0.0,
+        //     1.0,0.0,
+        //     1.0,1.0,
+        //     0.0,1.0
+
+        // ];
+
+        var mesh = Mesh.createFromArray( posArr.length/3,posArr,null);
+        mesh.setPrimitiveType(PrimitiveType.Triangular);
+        mesh.vertexColor = colors;
+        //mesh.uv = uvArr;
+        mesh.vertexIndices = indices;
+        return mesh;
+    }
+
     static createColorPlane(width,height,color,zValue){
         var plane = MeshUtil.createPlane(width,height,zValue);
         if(color === undefined){

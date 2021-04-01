@@ -47,7 +47,7 @@ function initCamera(asp){
     cam.setFar(100.0);
     cam.setNear(0.1);
     cam.setAsp(asp);
-    transform.setPosition(0,0,6);
+    transform.setPosition(0,0,10);
     //transform.rotate(0,0,0);
     return cam;
 }
@@ -64,11 +64,100 @@ function initScene(){
     var h = gl.canvas.clientHeight;
     var asp  = w/h;
     var cam = initCamera(asp);
-    // create Mesh:
-    //var mesh =createSqModelMesh();
-    //var mesh = MeshUtil.createColorBox();
-   // var mesh = MeshUtil.createPlane(3,3,2.0);
-  var mesh =  MeshUtil.createCameraPlane(cam);
+ 
+var colors = [0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0,
+                0.6,0.4,1.0,1.0];
+
+
+var c = 0.0; 
+var posArr = [
+        // inner
+        -3, -1,  c,
+        -2, -1,  c,
+        -1, -1.3, c,
+        1, -0.9, c,
+        
+        
+        //out
+        1,  1,  c,
+        -1,  3.9, c,
+        -2, 1.1, c,
+        -3, 1.4, c,
+    
+    ];
+    var inInds = [0,1,2,3];
+    var outInds = [4,5,6,7];
+
+var indices = [0,1,7,1,6,7,1,5,6,1,2,5,2,4,5,2,3,4];
+
+
+var newColors = [
+    
+];
+var newPosArr = [
+    -3, -1,  c,
+    -2.5, 2.0, c,
+    -2, -1,  c,
+    -1, -3.3, c,
+    1, -0.9, c
+];
+var newInInds = [];
+{
+    for(var i = 0; i < newPosArr.length/3; i++){
+        var posX = newPosArr[i];
+        var posY = newPosArr[i*3+1];
+        var posZ = newPosArr[i*3+2];
+       // newPosArr.push(posX,posY,posZ);
+        newColors.push(0.0,1.0,1.0,1.0);
+        newInInds.push(i);
+    } 
+}
+var newIndices = [];    
+var step = 0.2;
+var loop = 10;
+var alphaStep = 1.0/(loop-1);
+{
+    for(var j = 0; j<loop; j++){
+        for(var i = 0; i < newInInds.length; i++){
+            var posX = newPosArr[newInInds[i]*3];
+            var posY = newPosArr[newInInds[i]*3+1];
+            var posZ = newPosArr[newInInds[i]*3+2];
+            newPosArr.push(posX,posY+step*j,posZ);
+            newColors.push(alphaStep*j,1.0,1.0,1.0);
+        }
+        var l1_st = j*newInInds.length;
+        var l2_st = (j+1)*newInInds.length;
+        for(var k = 0; k < newInInds.length-1; k++){
+            newIndices.push(l1_st+k,l1_st+k+1,l2_st+k);
+            newIndices.push(l1_st+k+1,l2_st+k+1,l2_st+k);
+        }
+    }
+}
+//var indices = [0,1,7,1,6,7,1,2,6,4,5,6,2,4,6,2,3,4];
+//var indices  = [4,5,6];
+
+// var posArr = [
+//     // Front face
+//     -0.5, -0.5,  c,
+//     0.5, 0.4,  c,
+//     0.0,  0.6,  c,
+//     -0.5,  0.5,  c,
+// ];
+
+
+  
+
+
+
+//var mesh = MeshUtil.createColorPolygon(colors,indices,posArr);
+var mesh = MeshUtil.createColorPolygon(newColors,newIndices,newPosArr);
+  //var mesh = MeshUtil.createColorPlane(2,2,colors,0);
     /**@type {Material} */
     var material = MaterialUtil.createFromShader(vsSource,fsSource);
     material.shaderOption.vertexColor = true;
@@ -82,7 +171,7 @@ function initScene(){
     entity.mesh = mesh;
     entity.material = material;
     //entity.transform.setPosition(0,0,6);
-    entity.transform.copyFrom(cam.transform);
+    //entity.transform.copyFrom(cam.transform);
     //entity.transform.translate(0,0,0);
     //var ets = createSineBoxes(entity);
     // test anim

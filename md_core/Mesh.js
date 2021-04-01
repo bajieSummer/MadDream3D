@@ -10,7 +10,8 @@ var PrimitiveType = {
     LineStrip:2,
     LineLoop:3,
     Triangular:4,
-    TriangularFan:5
+    TriangularFan:5,
+    Line:6
 
 };
 class Mesh{
@@ -65,7 +66,7 @@ class Mesh{
             delete this.vertexBufferInfo;
             this.vertexBufferInfo = VertexBuffer.initVertexBuffer(
                 gl,this.vertexCount);
-            AttributeType = {};
+           
             if(this.vertexPos !== null){
                 VertexBuffer.addPos(gl,this.vertexBufferInfo,
                     this.vertexPos);
@@ -126,6 +127,8 @@ class Mesh{
             case PrimitiveType.Point:
                 gType = gl.POINTS;
                 break;
+            case PrimitiveType.Line:
+                gType = gl.LINES;
         }
         return gType;
     }

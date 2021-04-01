@@ -59,14 +59,6 @@ physics2Draw(pos,dPos){
 createSprJoint(pos,calls){
   // var baseUrl = "../pics/MD3d_hello.png"; 
    var unit = this.Dimensions.unit;     
-//    var smesh = MeshUtil.createBox(unit*0.1,unit*0.1,unit*0.1);
-//    var mat = SceneUtil.createMaterial(scene,{receiveLight:false,receiveShadow:false,
-//       texture0:baseUrl});
-//    var enti =SceneUtil.createEntity(scene,"box",
-//       {mesh:smesh,material:mat
-//       });
-//    enti.transform.setPosition(pos.x,pos.y,pos.z);
-   // 1 unit for 0.05m 
    
    if(calls === undefined){
       calls = {};
@@ -107,8 +99,6 @@ updateForces(i,entiArr){
       var Xu = MathUtil.V3SubV3(phy0.pos,phy.pos);
       var lenXu = MathUtil.getLength(Xu);
       upFp =MathUtil.V3MultiNum(Xu,phy0.ks/lenXu*(lenXu-phy0.l0));
-      
-     // upFd =phy0.kd*(phy0.v-phy.v)*Xu/lenXu;
      upFd  = MathUtil.multiplyV3(Xu,MathUtil.V3SubV3(phy0.v,phy.v));
      upFd = MathUtil.V3MultiNum(upFd,phy0.kd/lenXu);
    }
@@ -116,8 +106,6 @@ updateForces(i,entiArr){
    if(phy1!==null){
       var Xdn = MathUtil.V3SubV3(phy.pos,phy1.pos);
       var lenXdn = MathUtil.getLength(Xdn);
-      //dnFp =-1.0*phy.ks*Xdn/lenXdn*(lenXdn-phy.l0);
-      //dnFd =-1.0*phy.kd*(phy.v-phy1.v)*Xdn/lenXdn;
       dnFp = MathUtil.V3MultiNum(Xdn,-1.0*phy.ks/lenXdn*(lenXdn-phy.l0));
       dnFd = MathUtil.multiplyV3(Xdn,MathUtil.V3SubV3(phy.v,phy1.v));
       dnFd = MathUtil.V3MultiNum(dnFd,-1.0*phy.kd/lenXdn);
@@ -153,9 +141,6 @@ updatePosV(dt,F,i,entiArr){
    for(var j=(spring.length-1); j>0; j--){
       this.updatePosV(dt,F[j],j,spring);
       var dp = this.physics2Draw(spring[j].pos);
-    //   spring[j].transform.setPosition(dp.x,dp.y,dp.z);
-     // ds.linePos[j*3] = dp.x;ds.linePos[j*3+1] = dp.y;
-     // ds.linePos[j*3+2] = dp.z;
      if(callbacks.perJoint!==undefined){
          callbacks.perJoint(that,j,dp);
      }
