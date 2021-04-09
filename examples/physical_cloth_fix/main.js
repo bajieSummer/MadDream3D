@@ -53,11 +53,13 @@ function initScene(){
    particle.rigid.bind(particle.transform);
    particle.rigid.setKinematic(true);
 
-   
-   
-
+   var pmesh = MeshUtil.createBox(500,1,500);
+   var plane = SceneUtil.createEntity(ds.scene,"plane",
+   {mesh:pmesh,receiveLight:false,receiveShadow:false,matColor:[0.3,0.2,0.2,1.0]});
+   plane.transform.setPosition(0,-100,0);
+   ds.scene.addEntity(plane);
   // var pMesh  = MeshUtil.createBox(1000,0.0,1000);
-  var pMesh  = MeshUtil.createGridMesh(1,1,20,20,0,false,true);
+  var pMesh  = MeshUtil.createGridMesh(5,5,50,50,0,false,false);
  // pMesh.setPrimitiveType(PrimitiveType.Line);
   
    var enti = SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
@@ -81,6 +83,7 @@ function startWork(ds){
 function reset(ds){
    ds.particle.transform.setPosition(ds.resetPos.x,ds.resetPos.y,ds.resetPos.z);
    ds.particle.rigid.setKinematic(true);
+   ds.cloth.setKinematic(true);
 }
 
 function UI(ds){

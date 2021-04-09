@@ -11,14 +11,15 @@ class ClothSpring
         if (params === undefined) {
             params = {};
          }
+         // 100 9.1 8.5
          this.gravity = params.gravity===undefined ?new Vector3(0.0,-10.0,0.0):params.gravity;
-         this.mass = params.mass === undefined ?1:params.mass;
+         this.mass = params.mass === undefined ?100:params.mass;
          this.kbd = params.kbd === undefined ?8:params.kbd;
          this.dbd = params.dbd === undefined ?5:params.dbd;
-         this.kst = params.kst === undefined ?7:params.kst;
-         this.dst = params.dst === undefined ?4:params.dst;
-         this.ksr = params.ksr === undefined ?1.0:params.ksr;
-         this.dsr = params.dsr === undefined ?2.0:params.dsr;
+         this.kst = params.kst === undefined ?9:params.kst;
+         this.dst = params.dst === undefined ?7:params.dst;
+         this.ksr = params.ksr === undefined ?9.1:params.ksr;
+         this.dsr = params.dsr === undefined ?8.5:params.dsr;
          this.timestep = params.timestep === undefined ?0.01:params.timestep;
          this.updateHandler = null;
          this.isKinematic =false;
@@ -27,6 +28,7 @@ class ClothSpring
          this.velocity = params.velocity ===undefined ?[[]]:params.velocity;
          this.cachePos = [];
          this.cacheAcc = [];
+         this.lo = 0.01;
         //this.initAcc = params.initAcc;
          
     }
@@ -34,21 +36,33 @@ class ClothSpring
         if(mesh === undefined || mesh === null){
             console.log("mesh =",mesh);
         }
+        this.lo = mesh.w/mesh.m;
         var that = this;
+        this.init(mesh);
         that.updateHandler = window.setInterval(function() {
             if(!that.isKinematic){
-               that.update(that.timestep,mesh);
+               that.update(0.1,mesh);
             }
             
-         },that.timestep*1000);
+         },16);
+    }
+    init(mesh){
+        for(var i = 0; i<mesh.m+1; i++){
+            for(var j = 0; j<mesh.n+1; j++){
+                this.initCacheArr(this.cachePos,i,j);
+                this.initCacheArr(this.cacheAcc,i,j);
+                this.initCacheArr(this.velocity,i,j);
+            }
+        }
     }
     update(timestep,mesh){
         this.updateForce(timestep,mesh);
         this.updateVelocity(timestep,mesh);
         this.updateCachePos(timestep,mesh);
-        this.updateCollisionConstraints(timestep,mesh);
+        //this.updateCollisionConstraints(timestep,mesh);
         //this.updateProjConstraints(timestep,mesh);
         this.updateFinalPosV(timestep,mesh);
+        mesh.updateAllVertexPos(mesh.vertexPos);
     }
     getMeshPos(mesh,i,j){
         var ij = i*(mesh.n+1)+j;
@@ -64,6 +78,12 @@ class ClothSpring
         mesh.vertexPos[ij*3+1] = pos.y;
         mesh.vertexPos[ij*3+2] = pos.z;
     }
+    getDistance(pos1,pos2){
+        var dx = pos2.x-pos1.x;
+        var dy = pos2.y-pos1.y;
+        var dz = pos2.z-pos1.z;
+        return Math.sqrt(dx*dx+dy*dy+dz*dz);
+    }
     calSprForce(pos,v,mesh,k,d,indices){
         var res = {x:0,y:0,z:0};
         
@@ -71,18 +91,34 @@ class ClothSpring
             var ind = indices[i];
             var id =ind[0]; 
             var jd = ind[1];
-            this.initCacheArr(this.cachePos,id,jd);
+            if(id<0 || id>mesh.m){
+                continue;
+            }
+            if(jd<0 || jd>mesh.n){
+                continue;
+            }
+            //this.initCacheArr(this.cachePos,id,jd);
             var anchor = this.cachePos[id][jd];
-            this.initCacheArr(this.velocity,id,jd);
+            //this.initCacheArr(this.velocity,id,jd);
             var anchor_v = this.velocity[id][jd];
-            res.x += k*(anchor.x - pos.x) + d*(-1.0)*(v.x-anchor_v.x);
-            res.y += k*(anchor.y - pos.y) + d*(-1.0)*(v.y-anchor_v.y);
-            res.z += k*(anchor.z - pos.z) + d*(-1.0)*(v.z-anchor_v.z);
+            var t = this.getDistance(anchor,pos);
+            //if(t<=0.001) t = 0.001;
+          
+            var dlen = t-this.lo;
+            if(math.abs(dlen)<0.00001){
+                dlen = 0.0;
+            }
+            if(t<=0.00001) t = 0.00001;
+            var tf = dlen/t;
+            res.x +=tf*k*(anchor.x - pos.x) + d*(-1.0)*(v.x-anchor_v.x);//*(pos.x-anchor.x)
+            res.y +=tf*k*(anchor.y - pos.y)+ d*(-1.0)*(v.y-anchor_v.y);//*(pos.y-anchor.y)
+            res.z +=tf*k*(anchor.z - pos.z) + d*(-1.0)*(v.z-anchor_v.z);//*(pos.z-anchor.z)
         }
+        //console.log(res);
         return res;
     }
     isFix(i,j){
-        if(i ===0 && j===0){
+        if(i ===0){
             return true;
         }
         return false;
@@ -102,8 +138,8 @@ class ClothSpring
     updateForce(timestep,mesh){
         for(var i = 0; i<mesh.m+1; i++){
             for(var j = 0; j<mesh.n+1; j++){
-                this.initCacheArr(this.cacheAcc,i,j);
-                this.initCacheArr(this.velocity,i,j);
+                //this.initCacheArr(this.cacheAcc,i,j);
+                //this.initCacheArr(this.velocity,i,j);
                 if(this.isFix(i,j)) continue;
                 var pos = this.getMeshPos(mesh,i,j);
                 
@@ -112,36 +148,47 @@ class ClothSpring
                     [[i-1,j],[i+1,j],[i,j-1],[i,j+1]]);
                 var vm = this.mass/((mesh.m+1)*(mesh.n+1));
                 var fAll = structF;
-                this.initCacheArr(this.cacheAcc,i,j);
+                //this.initCacheArr(this.cacheAcc,i,j);
                 this.cacheAcc[i][j].x = fAll.x/vm + this.gravity.x;
                 this.cacheAcc[i][j].y = fAll.y/vm + this.gravity.y;
                 this.cacheAcc[i][j].z = fAll.z/vm + this.gravity.z;
             }
         }
+        //console.log(this.cacheAcc[0][1]);
+        // console.log(this.cacheAcc[1][0]);
+        // console.log(this.cacheAcc[1][1]);
     }
    
     updateVelocity(timestep,mesh){
         for(var i = 0; i<mesh.m+1; i++){
             for(var j = 0; j<mesh.n+1; j++){
                 //if(this.isFix(i,j)) continue;
-                this.initCacheArr(this.velocity,i,j);
+                //this.initCacheArr(this.velocity,i,j);
                 this.velocity[i][j].x += timestep*this.cacheAcc[i][j].x;
                 this.velocity[i][j].y += timestep*this.cacheAcc[i][j].y;
                 this.velocity[i][j].z += timestep*this.cacheAcc[i][j].z; 
             }
         }
+        console.log("v=",this.velocity[1][0]);
     }
     updateCachePos(timestep,mesh){
         for(var i = 0; i<mesh.m+1; i++){
             for(var j = 0; j<mesh.n+1; j++){
                //if(this.isFix(i,j)) continue;
                 var pos = this.getMeshPos(mesh,i,j);
-                this.initCacheArr(this.cachePos,i,j);
-                this.cachePos[i][j].x = pos.x + this.velocity[i][j].x*timestep;
-                this.cachePos[i][j].y = pos.y + this.velocity[i][j].y*timestep;
-                this.cachePos[i][j].z = pos.z + this.velocity[i][j].x*timestep;
+                //this.initCacheArr(this.cachePos,i,j);
+                var pPos ={};
+                pPos.x= pos.x + this.velocity[i][j].x*timestep;
+                pPos.y = pos.y + this.velocity[i][j].y*timestep;
+                pPos.z = pos.z + this.velocity[i][j].z*timestep;
+                this.cachePos[i][j].x = pPos.x;
+                this.cachePos[i][j].y = pPos.y;
+                this.cachePos[i][j].z = pPos.z;
             }
         }
+        //console.log("pos=",this.getMeshPos(mesh,1,0));
+        //console.log("cachep=",this.cachePos[1][0]);
+
     }
     updateCollisionConstraints(timestep,mesh){
         
@@ -180,7 +227,7 @@ class ClothSpring
     updateFinalPosV(timestep,mesh){
         for(var i = 0; i<mesh.m+1; i++){
             for(var j = 0; j<mesh.n+1; j++){
-                if(this.isFix(i,j)) continue;
+                //if(this.isFix(i,j)) continue;
                 var pos = this.getMeshPos(mesh,i,j);
                 var curPos = this.cachePos[i][j];
                 this.velocity[i][j].x = (curPos.x -pos.x)/timestep;
@@ -189,6 +236,7 @@ class ClothSpring
                 this.setMeshPos(mesh,i,j,curPos);
             }
         }
+        console.log("v=",this.velocity[1][0]);
     }
 
     setKinematic(kinematic)
