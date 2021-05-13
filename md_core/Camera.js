@@ -41,6 +41,11 @@ class Camera{
         this.afterDrawFunc = null;
         this.drawMips = false;
 
+        this.isGeneral = false;
+        this.left = -10.0;
+        this.right = 10.0;
+        this.top = -10.0;
+        this.bottom = 10.0; 
         
     }
     static createId(){
@@ -69,6 +74,8 @@ class Camera{
     getFar(){
         return this.far;
     }
+
+
 
     __updatePersp(){
         if(this.dirty){
@@ -120,11 +127,45 @@ class Camera{
         this.isOrthogonal = isOrthogonal;
         this.dirty = true;
     }
-    
+
+    setFrustrum(left,right,top,bottom){
+        this.left = left;
+        this.right = right;
+        this.top = top;
+        this.bottom = bottom;
+        this.isGeneral = true;
+        this.dirty = true;
+    }
+    __updateGeneral(){
+        // 2n/(right-left), 0, right+left/(right-left), 0
+        // 0, 2near/(top-bottom), top+bottom/(top-bottom), 0
+        // 0, 0,  f+n/f-n, 2fn/f-n
+        // 0, 0, -1, 0 
+        var n = this.near; var f = this.far;
+        var right = this.right; var left =this.left; 
+        var top = this.top; var bottom = this.bottom;
+
+        this.projectionMat = math.matrix(
+            [[2*n/(right-left),0,(right+left)/(right-left),0],
+            [0,2*n/(top-bottom),(top+bottom)/(top-bottom),0],
+            [0,0,(f+n)/(n-f),2*f*n/(n-f)],
+            [0,0,-1,0]]);
+        this.glProjArray = new Float32Array(
+        math.flatten(
+        math.transpose(this.projectionMat)._data
+        ));
+this.dirty = false;
+
+
+    }
     update(){
+        if(this.isGeneral){
+            this.__updateGeneral();
+            return;
+        }
        if(this.isOrthogonal){
             this.__updateOrth();
-       }else{
+       }{
             this.__updatePersp();
        }
     }

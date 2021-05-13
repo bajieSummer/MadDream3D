@@ -232,9 +232,9 @@ class Texture{
             //gl.getExtension('OES_standard_derivatives');
            // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,filter);
             //gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,filter);
-         
+            var isP2 = MathUtil.isPowerOf2(tex.width) && MathUtil.isPowerOf2(tex.height);
             if(hasMipMap && tex.hasMipMap){
-                if(MathUtil.isPowerOf2(tex.width) && MathUtil.isPowerOf2(tex.height)){
+                if(isP2){
                    // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.NEAREST_MIPMAP_LINEAR);
                     //gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
                     if(tex.elType ===TextureElemType.float){
@@ -263,6 +263,9 @@ class Texture{
                      
                    
                 }
+            }
+            if(!isP2){
+                gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
             }
             gl.bindTexture(type,null);
            

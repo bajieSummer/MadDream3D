@@ -16,8 +16,8 @@ class SceneUtil{
         if(params.extension === undefined){
             params.extension = ".jpg";
         }
-        params.depthTest = false;
-        params.depthWrite = false;
+        params.depthTest = true;
+        params.depthWrite = true;
         params.receiveLight = false;
         params.receiveShadow = false;
         params.cullFace = "FRONT";

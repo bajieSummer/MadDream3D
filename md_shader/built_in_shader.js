@@ -82,7 +82,8 @@ const fhead_simple_texture = `
 uniform sampler2D texture0;
 `;
 const fbody_simple_texture=`
-    gl_FragColor =  texture2D(texture0,fUV);
+    vec4 color_tex0 = texture2D(texture0,fUV);
+    gl_FragColor =  color_tex0;
 `;
 
 // light

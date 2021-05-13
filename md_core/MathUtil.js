@@ -55,6 +55,28 @@ function Vector3(x,y,z){
         this.x = vec3.x;
         this.y = vec3.y;
         this.z = vec3.z;
+    };
+    Vector3.prototype.dot = function(vec3){
+        return this.x*vec3.x + this.y*vec3.y +this.z*vec3.z;
+    };
+    Vector3.prototype.sub = function(vec3){
+        return new Vector3(this.x-vec3.x, this.y-vec3.y, this.z-vec3.z);
+    };
+    Vector3.prototype.cross = function(right){
+        var returnValue = new Vector3();
+        returnValue.x = this.y * right.z - this.z * right.y;
+        returnValue.y = this.z * right.x - this.x * right.z;
+        returnValue.z = this.x * right.y - this.y * right.x;
+        return returnValue;
+    };
+    Vector3.prototype.length = function(){
+        return Math.sqrt(this.x*this.x + this.y*this.y +this.z*this.z);
+    }
+    Vector3.prototype.normalize = function(){
+        var len = this.length();
+        this.x = this.x/len;
+        this.y = this.y/len;
+        this.z = this.z/len;
     }
 }
 

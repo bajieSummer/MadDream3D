@@ -66,7 +66,7 @@ class Mesh{
             delete this.vertexBufferInfo;
             this.vertexBufferInfo = VertexBuffer.initVertexBuffer(
                 gl,this.vertexCount);
-           
+                AttributeType = {};   
             if(this.vertexPos !== null){
                 VertexBuffer.addPos(gl,this.vertexBufferInfo,
                     this.vertexPos);
