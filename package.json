@@ -1,0 +1,15 @@
+{
+  "name": "maddream",
+  "version": "1.0.0",
+  "description": "maddream",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup-plugin-uglify": "^6.0.4"
+  }
+}
