@@ -148,11 +148,18 @@ void calLight(inout vec3 lcolor, inout vec3 spec, vec3 eyeDir, vec3 direction, v
 `;
 
 
-const func_calLight_blinn = `
+// const func_calLight_phong=`
+// void calLight(inout vec3 lcolor, inout vec3 spec,vec3 eyeDir, vec3 direction,vec3 normal, Light lt){
+//     lcolor  =lcolor + lt.diffuse*max(dot(normal,-1.0*direction),0.0);
+//     vec3 refDir = reflect(direction,normal);
+//     spec = spec + pow(max(dot(eyeDir,refDir),0.0),lt.shininess)*lt.specular;
+// }`;
+const func_calLight_blinn=`
 void calLight(inout vec3 lcolor, inout vec3 spec,vec3 eyeDir, vec3 direction,vec3 normal, Light lt){
     lcolor  =lcolor + lt.diffuse*max(dot(normal,-1.0*direction),0.0);
     vec3 refDir = reflect(direction,normal);
-    spec = spec + pow(max(dot(eyeDir,refDir),0.0),lt.shininess)*lt.specular;
+    vec3 h = normalize(-1.0*direction + eyeDir);
+    spec = spec + pow(max(dot(normal,h),0.0),lt.shininess)*lt.specular;
 }`;
 
 
