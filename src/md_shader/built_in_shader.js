@@ -438,7 +438,7 @@ vec3 ACESFilmicToneMapping( vec3 color ) {
 	color *= hdrExposure;
 	return saturate( ( color * ( 2.51 * color + 0.03 ) ) / ( color * ( 2.43 * color + 0.59 ) + 0.14 ) );
 }
-vec3 toneMapping( vec3 color ) { return LinearToneMapping( color ); }
+vec3 toneMapping( vec3 color ) { return ACESFilmicToneMapping( color ); }
 `;
 ////gl_FragColor.rgb = vec3(1.0)- exp(-1.0*hdrExposure*gl_FragColor.rgb);
 
