@@ -6,6 +6,8 @@
  */
 
 import { Vector3, MathUtil } from "./MathUtil";
+import { Mesh, PrimitiveType } from "./Mesh";
+import { GridMesh } from "./GridMesh";
 
 const PlaneMode = {
     "xy": 0,

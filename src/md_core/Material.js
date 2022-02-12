@@ -9,6 +9,7 @@ import { ShaderOption, UTypeEnumn, Program } from "./Program";
 import { MathUtil } from "./MathUtil";
 import { PassLayer } from "./Pass";
 import { CameraType } from "./Camera";
+import { LoadState } from "./Texture";
 
 
 function MatUni(/**@type {string}*/key,

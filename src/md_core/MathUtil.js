@@ -23,7 +23,7 @@ function myBrowser() {
         return "IE";
     }; //判断是否IE浏览器
 }
-var MDBrowser = myBrowser();
+export const MDBrowser = myBrowser();
 
 var MADDREAM = window.MADDREAM || {};
 /**@class

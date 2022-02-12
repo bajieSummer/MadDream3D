@@ -42,7 +42,7 @@ function responseToMouse(
 
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -864,18 +864,18 @@ console.log("color length=",colors.length);
 
 // var indices = [0,1,3,3,1,2];
 
-var mesh = MeshUtil.createColorPolygon(colors,indices,posArr);
+var mesh = Mad3D.MeshUtil.createColorPolygon(colors,indices,posArr);
   //var mesh = MeshUtil.createColorPlane(2,2,colors,0);
     /**@type {Material} */
-    var material = MaterialUtil.createFromShader(vsSource,fsSource);
+    var material = Mad3D.MaterialUtil.createFromShader(vsSource,fsSource);
     material.shaderOption.vertexColor = true;
-    material.setUniform("u_mouse",UTypeEnumn.Vec2,mid);
+    material.setUniform("u_mouse",Mad3D.UTypeEnumn.Vec2,mid);
    // material.shaderOption.cullFace = "FRONT";
    // console.log("resolution",w,h);
-    material.setUniform("u_resolution",UTypeEnumn.Vec2,[RMaxAvg,RMinAvg]);
+    material.setUniform("u_resolution",Mad3D.UTypeEnumn.Vec2,[RMaxAvg,RMinAvg]);
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     
@@ -884,7 +884,7 @@ var mesh = MeshUtil.createColorPolygon(colors,indices,posArr);
 }
 function initScene(){
     //default scene
-     var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+     var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     
      ds.camera.clearColor = [0.0,0.0,0.0,1.0];
     
@@ -896,8 +896,8 @@ function initScene(){
  
     var baseUrl = "../pics/MD3d_hello.png";      
     
-       var smesh = MeshUtil.createBox(3,3,3);
-       var enti1 =SceneUtil.createEntity(ds.scene,"box",
+       var smesh = Mad3D.MeshUtil.createBox(3,3,3);
+       var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
        {mesh:smesh,receiveLight:false,receiveShadow:false,
           texture0:baseUrl
           });
@@ -906,7 +906,7 @@ function initScene(){
    
     ds.scene.addEntity(createPolygonEntity());
      //interaction
-    InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
+    Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
     });
  
     return ds.scene;

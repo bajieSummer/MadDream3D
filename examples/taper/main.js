@@ -6,7 +6,7 @@
  */
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -22,7 +22,7 @@ var mdg = {};
 
 function initScene(){
     /**@type {WebGLRenderingContext} */
-    var gl = CanvasUtil.initCanvas("sipc");
+    var gl = Mad3D.CanvasUtil.initCanvas("sipc");
    gl.enable(gl.CULL_FACE);
    //gl.frontFace(gl.CCW);
    // gl.cullFace(gl.BACK);
@@ -35,20 +35,20 @@ function initScene(){
     //var mesh = MeshUtil.createColorBox(2,2,2);
     // var mesh = MeshUtil.createCircle(2.0,11);
     //var mesh = MeshUtil.createBox(2,2,2);
-     var mesh = MeshUtil.createTaper(2.5,1.0,6);
+     var mesh = Mad3D.MeshUtil.createTaper(2.5,1.0,6);
     //create scene
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     scene.clearColor = [0.5,0.5,0.5,1.0];
 
 
     // directionLight
-    var dlt = new DirectionLight();
+    var dlt = new Mad3D.DirectionLight();
     //dlt.color = new Vector3(1.0,1.0,1.0);
     dlt.transform.setPosition(2.0,2.0,2.0);
     //dlt.specular = new Vector3(0.9,0.9,0.9);
 
     //pointLight
-    var dlt2 = new PointLight();
+    var dlt2 = new Mad3D.PointLight();
     //dlt2.color = new Vector3(1.0,1.0,1.0);
     dlt2.transform.setPosition(0.0,0.0,3.5);
     dlt2.constant = 0.95;
@@ -59,31 +59,31 @@ function initScene(){
     scene.dirLights.push(dlt);
     scene.pointLights = [];
     //scene.pointLights.push(dlt2);
-    scene.ambientLight = new Vector3(0.1,0.1,0.1);
+    scene.ambientLight = new Mad3D.Vector3(0.1,0.1,0.1);
     
-    var shaderOps = new ShaderOption();
+    var shaderOps = new Mad3D.ShaderOption();
     //shaderOps.vertexColor = true;
     shaderOps.matColor = [0.0,1.0,1.0,1.0];
     shaderOps.texture0 = "../pics/test3.jpg";
    //shaderOps.texture0 = "pics/world.png";
-    shaderOps.diffuse = new Vector3(0.6,0.6,0.6);
-    shaderOps.specular = new Vector3(0.8,0.8,0.8);
+    shaderOps.diffuse = new Mad3D.Vector3(0.6,0.6,0.6);
+    shaderOps.specular = new Mad3D.Vector3(0.8,0.8,0.8);
     shaderOps.shininess = 10.0;
     shaderOps.dirLightCount = scene.dirLights.length;
     shaderOps.pointLightCount =scene.pointLights.length; 
     console.log(shaderOps.dirLightCount,shaderOps.pointLightCount);
     /**@type {Material} */
-    var material = MaterialUtil.createFromShaderOption(shaderOps);
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps);
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     //entity.transform.rotate(45,0,0);
     entity.transform.setPosition(0,0,0);
     var ets = [];
     ets.push(entity);
-    InteractUtil.registerMovehandler(gl.canvas,entity.transform);
+    Mad3D.InteractUtil.registerMovehandler(gl.canvas,entity.transform);
     scene.addCamera(cam);
     scene.entityList = ets;
     scene.gl = gl;

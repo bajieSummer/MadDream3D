@@ -40,7 +40,7 @@ function responseToMouse(
 
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -70,15 +70,15 @@ function initScene(){
     //var mesh = MeshUtil.createColorPlane(3,3);
     //var mesh =  MeshUtil.createCameraPlane(cam);
     //var mesh = MeshUtil.createBox(1,1,1);
-    var mesh = MeshUtil.createBox(2,2,2);//createPlane(4,4,0);
-    var shaderOps = new ShaderOption();
+    var mesh = Mad3D.MeshUtil.createBox(2,2,2);//createPlane(4,4,0);
+    var shaderOps = new Mad3D.ShaderOption();
     shaderOps.texture0 = "pics/cubetexture.png";
     /**@type {Material} */
-    var material = MaterialUtil.createFromShaderOption(shaderOps);
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps);
 
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     entity.transform.rotate(25,45,0);
@@ -87,7 +87,7 @@ function initScene(){
     var ets = [];
     ets.push(entity);
 
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     mdg.scene = scene;
     
     scene.addCamera(cam);
@@ -95,7 +95,7 @@ function initScene(){
     scene.gl = gl;
 
 
-    var m2 = TransformAni(scene,entity.transform,
+    var m2 = Mad3D.TransformAni(scene,entity.transform,
         {
             targets: entity.transform.rot,
             x: 360,
@@ -109,7 +109,7 @@ function initScene(){
             }
         });
 
-        var m3 = TransformAni(scene,entity.transform,
+        var m3 = Mad3D.TransformAni(scene,entity.transform,
             {
                 targets: entity.transform.rot,
                 y: 360,

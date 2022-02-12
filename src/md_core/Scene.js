@@ -17,8 +17,10 @@ import { UTypeEnumn, DefaultUniformKey } from "./Program";
 import { ClearMask } from "./Camera";
 import { RenderMask, RenderInfo, Render } from "./Render";
 import { Transform } from "./Transform";
+import { TextureType, LoadState } from "./Texture";
+import { RenderTexture } from "./RenderTexture";
 
-var FrameState = {
+export const FrameState = {
     BeforeDraw: 0,
     AfterDraw: 1
 };

@@ -21,26 +21,26 @@ function objLoad(url, callback) {
 
 function initScene() {
    //step1 default scene
-   var ds = Mad.SceneUtil.createDefaultScene("sipc", { hasSkyBox: false, castShadow: false });
+   var ds = Mad3D.SceneUtil.createDefaultScene("sipc", { hasSkyBox: false, castShadow: false });
    var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
    console.log("canvas width=" + w + "canvas height=" + h);
    ds.camera.clearColor = [0.2, 0.3, 0.1, 1.0];
 
-   ds.camera.renderMask = Mad.RenderMask.layers;
-   ds.camera.addRenderLayer(Mad.RenderLayer.default);
-   ds.scene.ambientLight = new Mad.Vector3(0.2, 0.2, 0.2);
+   ds.camera.renderMask = Mad3D.RenderMask.layers;
+   ds.camera.addRenderLayer(Mad3D.RenderLayer.default);
+   ds.scene.ambientLight = new Mad3D.Vector3(0.2, 0.2, 0.2);
    //step2 light
    var lt = ds.dirLight;
    var intes = 0.5;
-   lt.color = new Mad.Vector3(1.0 * intes, 1.0 * intes, 1.0 * intes);
-   lt.specular = new Mad.Vector3(1.0 * intes, 1.0 * intes, 1.0 * intes);
-   var lt2 = Mad.LightUtil.createShadowLight(0, 0, new Mad.Vector3(2, -2, 2), false, true);
+   lt.color = new Mad3D.Vector3(1.0 * intes, 1.0 * intes, 1.0 * intes);
+   lt.specular = new Mad3D.Vector3(1.0 * intes, 1.0 * intes, 1.0 * intes);
+   var lt2 = Mad3D.LightUtil.createShadowLight(0, 0, new Mad3D.Vector3(2, -2, 2), false, true);
    ds.scene.addLight(lt2);
 
-   var lt3 = Mad.LightUtil.createShadowLight(0, 0, new Mad.Vector3(-2, 2, 2), false, true);
+   var lt3 = Mad3D.LightUtil.createShadowLight(0, 0, new Mad3D.Vector3(-2, 2, 2), false, true);
    ds.scene.addLight(lt3);
 
-   var lt4 = Mad.LightUtil.createShadowLight(0, 0, new Mad.Vector3(-2, -2, 2), false, true);
+   var lt4 = Mad3D.LightUtil.createShadowLight(0, 0, new Mad3D.Vector3(-2, -2, 2), false, true);
    ds.scene.addLight(lt4);
 
 
@@ -49,8 +49,8 @@ function initScene() {
    var ft = 0.2;
    var metal = 0.1;
    var rough = 0.1;
-   var mat_diff = new Mad.Vector3(23.47 * ft, 21.31 * ft, 20.79 * ft);
-   var mat = Mad.SceneUtil.createMaterial(ds.scene, {
+   var mat_diff = new Mad3D.Vector3(23.47 * ft, 21.31 * ft, 20.79 * ft);
+   var mat = Mad3D.SceneUtil.createMaterial(ds.scene, {
       receiveLight: true, receiveShadow: false,
       gammaCorrect: true, matColor: [0.7, 0.6, 0.9, 1.0],
       roughness: rough, metalness: metal, PBR: isPBR, diffuse: mat_diff
@@ -73,7 +73,7 @@ function initScene() {
    //m.transform.scale(0.08,0.08,0.08);
    // ds.camera.transform.setPosition(0,0,-9.0);
    //interaction
-   Mad.InteractUtil.registerCameraMove(ds.camera, ds.scene.gl.canvas, function (trans) {
+   Mad3D.InteractUtil.registerCameraMove(ds.camera, ds.scene.gl.canvas, function (trans) {
    });
 
    // var m2 = TransformAni(ds.scene,tf,{

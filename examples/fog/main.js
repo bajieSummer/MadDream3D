@@ -8,14 +8,14 @@
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:true});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:true});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [1.0,1.0,1.0,1.0];
     //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(0.5,0.8,0.8);
-    lt.specular = new Vector3(1.0,1.0,1.0);
+    lt.color = new Mad3D.Vector3(0.5,0.8,0.8);
+    lt.specular = new Mad3D.Vector3(1.0,1.0,1.0);
 
     var fbody_fog2=`
     float n = 0.1;
@@ -50,36 +50,36 @@ gl_FragColor = mix(fogColor,gl_FragColor,fogFactor);
 `;
 
     //skybox
-    var skybox = SceneUtil.createSkyBox(ds.scene);
+    var skybox = Mad3D.SceneUtil.createSkyBox(ds.scene);
     //ds.scene.addEntity(skybox);        
      
     //small sphere
-   var enti1 =SceneUtil.createEntity(ds.scene,"sphere",
+   var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"sphere",
    {matColor:[1.0,0.5,0.6,1.0],receiveLight:true,receiveShadow:false,enableFog:true,fogExp:{density:0.09}});
    ds.scene.addEntity(enti1);
 
    //floor
-    var meshP = MeshUtil.createBox(100,0.5,100);
-   var enti2 = SceneUtil.createEntity(ds.scene,"floor",
+    var meshP = Mad3D.MeshUtil.createBox(100,0.5,100);
+   var enti2 = Mad3D.SceneUtil.createEntity(ds.scene,"floor",
    {matColor:[0.1,0.5,0.6,1.0],mesh:meshP,receiveLight:true,receiveShadow:true,enableFog:true,fogExp:{density:0.09}});
     enti2.transform.setPosition(0,-2,-2);
     ds.scene.addEntity(enti2);
 
     //light cube
-    var lcb_mesh = MeshUtil.createBox(0.5,0.5,0.5);
-    var lcb = SceneUtil.createEntity(ds.scene,"light_cube",
+    var lcb_mesh = Mad3D.MeshUtil.createBox(0.5,0.5,0.5);
+    var lcb = Mad3D.SceneUtil.createEntity(ds.scene,"light_cube",
     {mesh:lcb_mesh,receiveLight:false,matColor:[0.6,1.2,1.2,1.0],receiveShadow:false});
     lcb.transform.setPosition(2,2,2);
     ds.scene.addEntity(lcb);
 
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     
 var tf = enti1.transform;
-var m1 = TransformAni(ds.scene,tf,{
+var m1 = Mad3D.TransformAni(ds.scene,tf,{
         targets: tf.pos,
         z: -20,
         duration: 5000,

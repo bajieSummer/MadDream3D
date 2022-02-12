@@ -21,19 +21,19 @@ function objLoad(url,callback){
 
 function initScene(){
    //step1 default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.2,0.3,0.1,1.0];
    
-   ds.camera.renderMask = RenderMask.layers;
-    ds.camera.addRenderLayer(RenderLayer.default); 
-    ds.scene.ambientLight = new Vector3(0.2,0.2,0.2);
+   ds.camera.renderMask = Mad3D.RenderMask.layers;
+    ds.camera.addRenderLayer(Mad3D.RenderLayer.default); 
+    ds.scene.ambientLight = new Mad3D.Vector3(0.2,0.2,0.2);
     //step2 light
     var lt = ds.dirLight;
     var intes = 2.0;
-    lt.color = new Vector3(1.0*intes,1.0*intes,1.0*intes);
-    lt.specular = new Vector3(1.0*intes,1.0*intes,1.0*intes);
+    lt.color = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
+    lt.specular = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
  
     // step3 : render sphere Hdr to cube
    // var m = SceneUtil.createEntity(ds.scene,"sp1",{
@@ -69,7 +69,7 @@ function initScene(){
    //m.transform.scale(0.08,0.08,0.08);
   // ds.camera.transform.setPosition(0,0,-9.0);
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
    });
     
 // var m2 = TransformAni(ds.scene,tf,{

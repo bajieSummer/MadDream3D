@@ -8,7 +8,7 @@
 import { Vector3, Vector4, MathUtil } from "./MathUtil";
 import { Material } from "./Material";
 import { UTypeEnumn } from "./Program";
-import { TextureBlend } from "./Texture";
+import { TextureBlend, Texture, TextureType, LoadState } from "./Texture";
 
 class MaterialUtil {
     static createFromShader(vsource, fsource) {

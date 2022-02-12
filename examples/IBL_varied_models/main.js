@@ -34,7 +34,7 @@ function changeMesh(key,meshDicts,scene,enti){
    meshDicts[key] = {mesh:null,state:-1};
    meshDicts[key].state = 0;
    meshDicts[key].mesh = null;
-   AssetsMgr.getMgr().load(path,{scene:scene,isMesh:true},function(meshes){
+   Mad3D.AssetsManager.getManager().load(path,{scene:scene,isMesh:true},function(meshes){
       meshDicts[key].state = 1;
       meshDicts[key].mesh = meshes[0];
       _changeMeshOnNextFrame({mesh:meshes[0],key:key},
@@ -70,7 +70,7 @@ function __createPBRMat(scene,key){
     //var folder = "../pics/rusted_iron/";
    //var  folder = "../pics/wall/";
    var tf = 0.00;
-   var diff = new Vector3(1.0*tf,1.0*tf,1.0*tf);
+   var diff = new Mad3D.Vector3(1.0*tf,1.0*tf,1.0*tf);
    var folder = "../pics/"+key+"/";
    var baseUrl = folder+"albedo.png";
    var metalUrl = folder+"metallic.png";
@@ -78,17 +78,17 @@ function __createPBRMat(scene,key){
    var normalUrl = folder +"normal.png";
    var aoUrl = folder+"ao.png"; 
    var heightUrl = folder+"height.png";
-   var tex = new Texture("Camera",1,1);
+   var tex = new Mad3D.Texture("Camera",1,1);
    var mat = null;
    if(key === "white"){
-         mat = SceneUtil.createMaterial(scene,{receiveLight:true,receiveShadow:false,diffuse:diff,
+         mat = Mad3D.SceneUtil.createMaterial(scene,{receiveLight:true,receiveShadow:false,diffuse:diff,
          PBR:true,
          matColor:[0.93, 0.91, 0.81,1.0],roughness:0.0,metalness:0.0,
           radianceMap:scene.currentEnvMap,
          gammaCorrect:true,hdrExposure:1.0});
    }else{
       // tex.type = TextureType.cube;
-      mat = SceneUtil.createMaterial(scene,{receiveLight:true,receiveShadow:false,diffuse:diff,
+      mat = Mad3D.SceneUtil.createMaterial(scene,{receiveLight:true,receiveShadow:false,diffuse:diff,
       PBR:true,
        texture0:baseUrl,metalMap:metalUrl,roughMap:roughUrl,normalMap:normalUrl,
        radianceMap:scene.currentEnvMap,
@@ -114,14 +114,14 @@ function __createEnvMat(scene,key){
 
    if(key.indexOf(".")>=0){
       // textures mat
-      mat = SceneUtil.createMaterial(scene,{
+      mat = Mad3D.SceneUtil.createMaterial(scene,{
          texture0:"../pics/sphericalMap/"+key,receiveLight:false,
          cullFace:"FRONT"
       });
    }else{
       //cube mat
       var spMap = createCubeUrls("../pics/"+key+"/",".hdr");
-      mat = SceneUtil.createMaterial(scene,{cubeMap:spMap,receiveLight:false,
+      mat = Mad3D.SceneUtil.createMaterial(scene,{cubeMap:spMap,receiveLight:false,
          cullFace:"FRONT"});
    }
    return mat;
@@ -140,30 +140,30 @@ function getEnvMat(scene,key,skyMatDict){
 
 function initScene(){
    //step1 default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false,canvasLayout:Layout.UseOwn});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false,canvasLayout:Mad3D.Layout.UseOwn});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.camera.renderMask = RenderMask.layers;
-    ds.camera.addRenderLayer(RenderLayer.default);
+    ds.camera.renderMask = Mad3D.RenderMask.layers;
+    ds.camera.addRenderLayer(Mad3D.RenderLayer.default);
   
-    ds.scene.ambientLight = new Vector3(0.0,0.0,0.0);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.0,0.0,0.0);
     //step2 light
     var lt = ds.dirLight;
     var intes = 0.0;
-    lt.color = new Vector3(1.0*intes,1.0*intes,1.0*intes);
-    lt.specular = new Vector3(1.0*intes,1.0*intes,1.0*intes);
-    var smesh = MeshUtil.createSphere(2.0,100,100,true);
+    lt.color = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
+    lt.specular = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
+    var smesh = Mad3D.MeshUtil.createSphere(2.0,100,100,true);
     // step3 : render sphere Hdr to cube
     ds.scene.envMatDict = {};
     var envMat = getEnvMat(ds.scene,"pisaHDR",ds.scene.envMatDict);
-   var envLayer = RenderLayer.default+2;
-   var cubeCam =IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
+   var envLayer = Mad3D.RenderLayer.default+2;
+   var cubeCam =Mad3D.IBLUtil.createRadianceCamera(envMat,smesh,w,h,envLayer,ds.scene);
    ds.scene.currentEnvMap = cubeCam.renderTarget;
         
          //add sky
-   var skycube =  MeshUtil.createBox(20,20,20);
-   var sky = SceneUtil.createEntity(ds.scene,"sky",
+   var skycube =  Mad3D.MeshUtil.createBox(20,20,20);
+   var sky = Mad3D.SceneUtil.createEntity(ds.scene,"sky",
       {mesh:skycube,cubeMap:ds.scene.currentEnvMap,receiveLight:false,
          cullFace:"FRONT",gammaCorrect:true});
    ds.scene.addEntity(sky);
@@ -182,7 +182,7 @@ function initScene(){
 
       ds.scene.matDicts = {};
         var mat = getPBRMat(ds.scene,"white",ds.scene.matDicts);
-         var enti2 =SceneUtil.createEntity(ds.scene,"sphere",
+         var enti2 =Mad3D.SceneUtil.createEntity(ds.scene,"sphere",
       {mesh:smesh,material:mat
          });
          ds.scene.addEntity(enti2);
@@ -228,7 +228,7 @@ function initScene(){
 
     var meshSl = document.getElementById("slectMesh");
     ds.meshDicts = {"sphere":{mesh:smesh,state:1}};
-    AssetsMgr.getMgr().registerParser("obj",OBJParser);
+    Mad3D.AssetsManager.getManager().registerParser("obj",OBJParser);
     meshSl.addEventListener('change',function(){
       console.log(this.value);
       changeMesh(this.value,ds.meshDicts,ds.scene,chooseEnti);
@@ -236,7 +236,7 @@ function initScene(){
   
    //changeMesh("full_qhc4.obj",ds.meshDicts,ds.scene,chooseEnti);
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     

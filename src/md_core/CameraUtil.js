@@ -7,6 +7,7 @@
 
 import { ClearMask, Camera, CameraType } from "./Camera";
 import { RenderLayer, RenderMask } from "./Render";
+import { RenderTexture } from "./RenderTexture";
 
 class CameraUtil {
     static createDefaultCamera(asp) {

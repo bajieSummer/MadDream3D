@@ -22,17 +22,17 @@ function createCubeUrls(pf,et){
 }
 
 function createCubeCamera(w,h,layer){
-   var rt = new RenderTexture("Camera",w,h,TextureType.cube);
-   rt.elType =TextureElemType.float;
+   var rt = new Mad3D.RenderTexture("Camera",w,h,Mad3D.TextureType.cube);
+   rt.elType =Mad3D.TextureElemType.float;
    rt.hasMipMap =false;
-   var cam = CameraUtil.createDefaultCamera(w/h);
+   var cam = Mad3D.CameraUtil.createDefaultCamera(w/h);
    var n =0.1;
    cam.setFov(90);
    cam.setNear(n);
    cam.clearColor = [1.0,0.0,0.0,1.0];
    cam.transform.setPosition(0,0,0);
    cam.renderTarget = rt;
-   cam.renderMask = RenderMask.layers;
+   cam.renderMask = Mad3D.RenderMask.layers;
    cam.addRenderLayer(layer);
    return cam;
 }
@@ -49,7 +49,7 @@ function createRenderSphere(params,entiParams){
       namePrefix = "dft";
    }
    if(pos === undefined){
-      pos = new Vector3(0,0,0);
+      pos = new Mad3D.Vector3(0,0,0);
    }
    if(layer === undefined || scene === undefined  || envCam === undefined){
       console.log("we need information of layer, scene, envCam");
@@ -58,7 +58,7 @@ function createRenderSphere(params,entiParams){
 
 
    var spName = namePrefix +"entity";
-   var sp = SceneUtil.createEntity(scene,spName,entiParams);
+   var sp = Mad3D.SceneUtil.createEntity(scene,spName,entiParams);
    envCam.name =namePrefix+"Cam";
    envCam.renderTarget.name=namePrefix+"Tex";
    sp.material.name= namePrefix+"Mat";
@@ -87,7 +87,7 @@ function createRenderSphere(params,entiParams){
                envCam.enable = false;
                envCam.finishShot = true;
                console.log("close camera>>>",envCam.name);
-               if(!MathUtil.isNone(envCam.next)){
+               if(!Mad3D.MathUtil.isNone(envCam.next)){
                   envCam.next.enable = true;
                   console.log("open camera>>>",envCam.next.name);
                }
@@ -102,22 +102,22 @@ function createRenderSphere(params,entiParams){
 
 function initScene(){
    //step1 default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.camera.renderMask = RenderMask.layers;
-    ds.camera.addRenderLayer(RenderLayer.default);
-    ds.scene.ambientLight = new Vector3(0.1,0.1,0.1);
+    ds.camera.renderMask = Mad3D.RenderMask.layers;
+    ds.camera.addRenderLayer(Mad3D.RenderLayer.default);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.1,0.1,0.1);
     //step2 light
     var lt = ds.dirLight;
     var intes = 0.0;
-    lt.color = new Vector3(1.0*intes,1.0*intes,1.0*intes);
-    lt.specular = new Vector3(1.0*intes,1.0*intes,1.0*intes);
-    var smesh = MeshUtil.createSphere(2.0,50,50,true);
+    lt.color = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
+    lt.specular = new Mad3D.Vector3(1.0*intes,1.0*intes,1.0*intes);
+    var smesh = Mad3D.MeshUtil.createSphere(2.0,50,50,true);
 
     // step3 : render sphere Hdr to cube
-   var envLayer = RenderLayer.default+2;
+   var envLayer = Mad3D.RenderLayer.default+2;
    var cubeCam = createCubeCamera(w,h,envLayer);
    ds.scene.addCamera(cubeCam);
    var spMap = "../pics/sphericalMap/Brooklyn_Bridge.hdr";
@@ -132,12 +132,12 @@ function initScene(){
 
  
    // step4 :render iradiance from envcube to iradianceMap
-   var iradLayer = RenderLayer.default +3;
+   var iradLayer = Mad3D.RenderLayer.default +3;
    var iradCam = createCubeCamera(w,h,iradLayer);
    iradCam.clearColor = [0.0,1.0,0.0,1.0];
    ds.scene.addCamera(iradCam);
 
-   var  bm = MeshUtil.createBox(1,1,1);
+   var  bm = Mad3D.MeshUtil.createBox(1,1,1);
    var iradSp = createRenderSphere(
       {scene:ds.scene,envCam:iradCam,layer:iradLayer,
          reqCam:cubeCam,namePrefix:"irad"},
@@ -164,7 +164,7 @@ function initScene(){
       
       //step5 render sphere to main camera
       var tf = 0.00;
-      var diff = new Vector3(1.0*tf,1.0*tf,1.0*tf);
+      var diff = new Mad3D.Vector3(1.0*tf,1.0*tf,1.0*tf);
       var pf_spec = "../pics/sky1_radiance/";
       var ibllut = pf_spec+"brdf.png";
      // var folder = "../pics/rusticMetal1/";
@@ -180,7 +180,7 @@ function initScene(){
        var envMap1 =createCubeUrls("../pics/sky1_irradiance/",".hdr");
    //normalMap:normalUrl,
    //metalMap:metalUrl,roughMap:roughUrl,
-      var enti1 =SceneUtil.createEntity(ds.scene,"sphere",
+      var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"sphere",
       {mesh:smesh,receiveLight:true,receiveShadow:false,diffuse:diff,
          texture0:baseUrl,PBR:true,normalMap:normalUrl,
          metalMap:metalUrl,roughMap:roughUrl,
@@ -197,12 +197,12 @@ function initScene(){
   
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     
 var tf = enti1.transform;
-var m1 = TransformAni(ds.scene,tf,{
+var m1 = Mad3D.TransformAni(ds.scene,tf,{
         targets: tf.rot,
         y: 360,
         duration: 5000,

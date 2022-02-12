@@ -22,25 +22,25 @@ function createCubeUrls(pf,et){
 }
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.scene.ambientLight = new Vector3(0.1,0.1,0.1);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.1,0.1,0.1);
     //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(2.0,2.0,2.0);
+    lt.color = new Mad3D.Vector3(2.0,2.0,2.0);
     //lt.color = new Vector3(5.0,5.0,5.0);
-    lt.specular = new Vector3(1.5,1.5,1.5);
-   var skybox = SceneUtil.createSkyBox(ds.scene);
+    lt.specular = new Mad3D.Vector3(1.5,1.5,1.5);
+   var skybox = Mad3D.SceneUtil.createSkyBox(ds.scene);
    ds.scene.addEntity(skybox); 
    var gl = ds.scene.gl;       
    var w = gl.canvas.width; var h = gl.canvas.height;
    //h = w;
   // w = 512.0;h =512.0;
-   var rt = new RenderTexture("Camera",w,h,TextureType.cube);
+   var rt = new Mad3D.RenderTexture("Camera",w,h,Mad3D.TextureType.cube);
    /**@type {Camera} */
-   var cam = CameraUtil.createDefaultCamera(w/h);
+   var cam = Mad3D.CameraUtil.createDefaultCamera(w/h);
    var n = 10.0;
    cam.setFov(90);
    cam.setNear(n);
@@ -48,14 +48,14 @@ function initScene(){
    cam.transform.setPosition(0,0,0);
    cam.renderTarget = rt;
    ds.scene.addCamera(cam);
-   cam.renderMask = RenderMask.layers;
-   cam.addRenderLayer(RenderLayer.default);
+   cam.renderMask = Mad3D.RenderMask.layers;
+   cam.addRenderLayer(Mad3D.RenderLayer.default);
    var skyfolder = "../pics/cube/bridge/";
    var skyEnv = createCubeUrls(skyfolder,".jpg");
 
-   var boxMesh1 = MeshUtil.createBox(10,10*w/h,0.5);
+   var boxMesh1 = Mad3D.MeshUtil.createBox(10,10*w/h,0.5);
    //var boxMesh1 = MeshUtil.createSphere(1.5,50,50);
-   var box = SceneUtil.createEntity(ds.scene,"box",{
+   var box = Mad3D.SceneUtil.createEntity(ds.scene,"box",{
       envMap:rt,reflective:1.0,mesh:boxMesh1,receiveLight:true
    });
    box.transform.setPosition(0,0,-10);
@@ -63,10 +63,10 @@ function initScene(){
    tc = box.transform.pos;
    cam.transform.setPosition(tc.x,tc.y,tc.z-n);
    ds.scene.addEntity(box);
-   box.renderLayer = RenderLayer.default+2;
+   box.renderLayer = Mad3D.RenderLayer.default+2;
 
-   var boxMesh = MeshUtil.createBox(1,1,1);
-   var box2 = SceneUtil.createEntity(ds.scene,"box",{
+   var boxMesh = Mad3D.MeshUtil.createBox(1,1,1);
+   var box2 = Mad3D.SceneUtil.createEntity(ds.scene,"box",{
       matColor:[0.7,0.2,0.3,1.0],mesh:boxMesh
    });
    box2.transform.setPosition(-3,0,-3);
@@ -76,21 +76,21 @@ function initScene(){
       // var iw = 3.0;
       // var ratio = 512.0/768.0;
       // var ih = iw*1.5;
-      var smesh = MeshUtil.createSphere(1.2,50,50);
+      var smesh = Mad3D.MeshUtil.createSphere(1.2,50,50);
      
-      var enti1 =SceneUtil.createEntity(ds.scene,"sphere",
+      var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"sphere",
       {matColor:[0.97, 0.6, 0.91,1.0], mesh:smesh,receiveLight:true,receiveShadow:false,envMap:skyEnv,reflective:0.8
          });
    ds.scene.addEntity(enti1);
   
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     
 var tf = box2.transform;
-var m1 = TransformAni(ds.scene,tf,{
+var m1 = Mad3D.TransformAni(ds.scene,tf,{
         targets: tf.pos,
         z: -10,
         duration: 5000,

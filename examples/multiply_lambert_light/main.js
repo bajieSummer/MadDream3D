@@ -40,7 +40,7 @@ function responseToMouse(
 
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -70,23 +70,23 @@ function initScene(){
     //var mesh = MeshUtil.createColorPlane(3,3);
     //var mesh =  MeshUtil.createCameraPlane(cam);
     //var mesh = MeshUtil.createBox(1,1,1);
-    var mesh = MeshUtil.createBox(2,2,2);//createPlane(4,4,0);
-    var shaderOps = new ShaderOption();
+    var mesh = Mad3D.MeshUtil.createBox(2,2,2);//createPlane(4,4,0);
+    var shaderOps = new Mad3D.ShaderOption();
     shaderOps.texture0 = "pics/1.jpg";
-    shaderOps.diffuse = new Vector3(1.5,1.5,1.5);
+    shaderOps.diffuse = new Mad3D.Vector3(1.5,1.5,1.5);
     shaderOps.dirLightCount = 2; 
-    var dlt = new Light();
-    dlt.color = new Vector3(0.3,0.3,1.0);
+    var dlt = new Mad3D.Light();
+    dlt.color = new Mad3D.Vector3(0.3,0.3,1.0);
     dlt.transform.setPosition(-1.0,-1.0,0);
 
-    var dlt2 = new Light();
-    dlt2.color = new Vector3(1.0,0.2,0.3);
+    var dlt2 = new Mad3D.Light();
+    dlt2.color = new Mad3D.Vector3(1.0,0.2,0.3);
     dlt2.transform.setPosition(1.0,0.0,0.0);
     /**@type {Material} */
-    var material = MaterialUtil.createFromShaderOption(shaderOps);
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps);
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     entity.transform.rotate(25,45,0);
@@ -95,12 +95,12 @@ function initScene(){
     var ets = [];
     ets.push(entity);
 
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     scene.clearColor = [0.5,0.5,0.5,1.0];
     scene.dirLights = [];
     scene.dirLights.push(dlt);
     scene.dirLights.push(dlt2);
-    scene.ambientLight = new Vector3(0.1,0.1,0.1);
+    scene.ambientLight = new Mad3D.Vector3(0.1,0.1,0.1);
     mdg.scene = scene;
 
     
@@ -109,7 +109,7 @@ function initScene(){
     scene.gl = gl;
 
 
-    var m2 = TransformAni(scene,entity.transform,
+    var m2 = Mad3D.TransformAni(scene,entity.transform,
         {
             targets: entity.transform.rot,
             x: 360,
@@ -123,7 +123,7 @@ function initScene(){
             }
         });
 
-        var m3 = TransformAni(scene,entity.transform,
+        var m3 = Mad3D.TransformAni(scene,entity.transform,
             {
                 targets: entity.transform.rot,
                 y: 360,

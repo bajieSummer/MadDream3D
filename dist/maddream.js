@@ -1,5 +1,191 @@
-var Mad = (function (exports) {
+var Mad3D = (function (exports) {
     'use strict';
+
+    /*
+     * @Author: Sophie
+     * @email: bajie615@126.com
+     * @Date: 2020-01-17 12:39:57
+     * @Description: file content
+     */
+    const DefaultUniformKey = {
+        projectionMatrix: "projectionMatrix",
+        modelViewMatrix: "modelViewMatrix"
+    };
+
+    function UniTypeInfo(loc,
+        /** @type {UTypeEnumn} */utype) {
+        this.loc = loc;
+        /** @type {UTypeEnumn} */
+        this.utype = utype;
+        this.value = null;
+    }
+
+    function ShaderOption() {
+        this.vertexColor = null;
+        this.texture0 = null;
+        this.depthTest = true;
+        this.depthWrite = true;
+        this.enableCull = true;
+        this.cullFace = "BACK";
+        this.castShadow = false;
+        this.receiveShadow = false;
+        this.uniformsToUp = {};
+        this.useUV = false;
+        this.IBL = false;
+    }
+
+    var AttributeType = {
+        vertexPos: true,
+        types: {}
+    };
+
+    function AttributesInfo() {
+        this.vertexPos = -1;
+        this.vertexColor = -1;
+        this.uv = -1;
+        this.vertexNormal = -1;
+        this.vertexTangent = -1;
+    }
+
+    const UTypeEnumn = {
+        Mat4: "uniformMatrix4fv",
+        Mat3: "uniformMatrix3fv",
+        Vec4: "uniform4fv",
+        Vec3: "uniform3fv",
+        Vec2: "uniform2fv",
+        float: "uniform1f",
+        texture: "uniform1i",
+        vec2i: "uniform2iv",
+        vec3i: "uniform3iv",
+        vec4i: "uniform4iv"
+
+    };
+
+    function UniformsInfo() {
+        /** @type {UniTypeInfo} */
+        this.projectionMatrix = new UniTypeInfo(null, UTypeEnumn.Mat4);
+        this.modelViewMatrix = new UniTypeInfo(null, UTypeEnumn.Mat4);
+    }
+
+    function ProgramInfo(/**@type {WebGLProgram}*/program,
+        /**@type {AttributesInfo} */
+        attribLocations,
+        /**@type {UniformsInfo} */
+        uniformLocations,
+            /**@type {UniformsInfo} */shaderOps) {
+        this.program = program;
+        /**@type {AttributesInfo} */
+        this.attribLocations = attribLocations;
+        /**@type {UniformsInfo} */
+        this.uniformLocations = uniformLocations;
+        /**@type {ShaderOption} */
+        this.shaderOption = shaderOps;
+
+    }
+
+    class Program {
+        constructor(/** @type {WebGLRenderingContext}*/ gl,
+            vsSource, fsSource,
+             /**@type {ShaderOption}*/shaderOps) {
+            // this.pAttrList=["vertexPos","vertexColor"],
+            // this.pUniList={projectionMatrix:UTypeEnumn.Mat4,
+            //     modelViewMatrix:UTypeEnumn.Mat4};
+            this.gl = gl;
+            // this.vsSource = vsSource;
+            // this.fsSource = fsSource;
+            /**@type {WebGLProgram} */
+            this.shaderProgram = Program.initialShaderProgram(gl, vsSource, fsSource);
+            /**@type {ProgramInfo} */
+            this.programInfo = Program.createProgramInfo(gl, this.shaderProgram, shaderOps);
+        }
+
+        updateUniform(key,/** @type {UTypeEnumn}*/type,
+            value) {
+            var uni = this.programInfo.uniformLocations[key];
+            if (uni === undefined) {
+                var loc = this.gl.getUniformLocation(this.shaderProgram, key);
+                if (loc !== (null )) {
+                    this.programInfo.uniformLocations[key] = new UniTypeInfo(loc, type);
+                    this.programInfo.uniformLocations[key].value = value;
+                    return true;
+                } else {
+                    console.warn("there is no " + key + "in the complied shader ");
+                    return false;
+                }
+            }
+            uni.value = value;
+            return true;
+        }
+
+        static loadShader(/** @type {WebGLRenderingContext} */gl,
+            type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            //console.log(source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                var info = gl.getShaderInfoLog(shader);
+                alert("shader complier error type = " + type + " info=" + info);
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        static initialShaderProgram(/** @type {WebGLRenderingContext} */gl,
+            vsSource, fsSource) {
+            const vs = Program.loadShader(gl, gl.VERTEX_SHADER, vsSource);
+            if (vs === null) {
+                console.error("vertex shader got something wrong", vsSource);
+            }
+            const fs = Program.loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+            if (fs === null) {
+                console.error("fragment shader got something wrong", fsSource);
+            }
+            const shaderProgram = gl.createProgram();
+            // console.log("vertexShader::>>",vsSource);
+            //console.log("fragmentShader::>>",fsSource);
+            gl.attachShader(shaderProgram, vs);
+            gl.attachShader(shaderProgram, fs);
+            gl.linkProgram(shaderProgram);
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                alert("unable to initialize the shader program:" + gl.getProgramInfoLog(shaderProgram));
+                // why not delete program ??
+                gl.deleteProgram(shaderProgram);
+                return null;
+            }
+            return shaderProgram;
+        }
+
+
+
+        static createProgramInfo(/**@type {WebGLRenderingContext}*/gl,
+            shaderProgram,
+            /**@type {ShaderOption}*/shaderOps
+        ) {
+            var attributes = new AttributesInfo();
+            for (var attr in attributes) {
+                // if(shaderOps[attr] !==false){
+                var loc = gl.getAttribLocation(shaderProgram, attr);
+                if (loc !== -1 && loc !== null && loc !== undefined) {
+                    attributes[attr] = loc;
+                }
+
+                //}
+            }
+            var uniforms = new UniformsInfo();
+            for (var uni in uniforms) {
+                //if(shaderOps[uni] !==false){
+                var uloc = gl.getUniformLocation(shaderProgram, uni);
+                if (uloc !== -1 && uloc !== null && uloc !== undefined) {
+                    uniforms[uni].loc = uloc;
+                }
+                //}
+            }
+            var programInfo = new ProgramInfo(shaderProgram, attributes, uniforms, shaderOps);
+            return programInfo;
+        }
+    }
 
     /*
      * @Author: Sophie
@@ -155,8 +341,8 @@ var Mad = (function (exports) {
         if (userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera) {
             return "IE";
         }}
-    myBrowser();
-    var Epsilon$1 = 0.0000000001;
+    const MDBrowser = myBrowser();
+    var Epsilon = 0.0000000001;
     function Vector4(x, y, z, w) {
 
         this.x = x;
@@ -283,7 +469,7 @@ var Mad = (function (exports) {
 
         static normalize(vec3) {
             var len = this.getLength(vec3);
-            if (len < Epsilon$1) {
+            if (len < Epsilon) {
                 console.warn("warning: two small");
             }
             return new Vector3(vec3.x / len, vec3.y / len, vec3.z / len);
@@ -589,13 +775,13 @@ var Mad = (function (exports) {
             var len = Math.sqrt(dx * dx + dy * dy + dz * dz);
             var citax = 0;
             var citay = 0;
-            if (len < Epsilon) {
+            if (len < MathUtil.Epsilon) {
                 return;
             }
             var ndx = dx / len; var ndy = dy / len; var ndz = dz / len;
             citax = -1.0 * Math.asin(ndy) * 180.0 / Math.PI;
             var r = Math.sqrt(ndx * ndx + ndz * ndz);
-            if (r < Epsilon) {
+            if (r < MathUtil.Epsilon) {
                 citay = 0.0;
             } else {
                 citay = Math.asin(ndx / r) * 180.0 / Math.PI;
@@ -617,14 +803,14 @@ var Mad = (function (exports) {
             var len = Math.sqrt(dx * dx + dy * dy + dz * dz);
             var citax = 0;
             var citay = 0;
-            if (len < Epsilon) {
+            if (len < MathUtil.Epsilon) {
                 return;
             }
      var ndy = dy / len;        var citard = Math.asin(-1.0 * ndy);
             citax = citard * 180.0 / Math.PI;
             var r = len * Math.cos(citard);// Math.sqrt(ndx*ndx +ndz*ndz);
 
-            if (Math.abs(r) < Epsilon) {
+            if (Math.abs(r) < MathUtil.Epsilon) {
                 citay = 0.0;
             } else {
                 citay = Math.atan(dx / dz) * 180.0 / Math.PI;
@@ -786,188 +972,352 @@ var Mad = (function (exports) {
     /*
      * @Author: Sophie
      * @email: bajie615@126.com
-     * @Date: 2020-01-17 12:39:57
+     * @Date: 2020-02-09 21:04:12
      * @Description: file content
      */
-    const DefaultUniformKey = {
-        projectionMatrix: "projectionMatrix",
-        modelViewMatrix: "modelViewMatrix"
+
+    const LoadState = {
+        init: 0,
+        loading: 1,
+        loaded: 2
+    };
+    const TextureElemType = {
+        default: "UNSIGNED_BYTE",
+        float: "FLOAT",
+        halfFloat: "HALFFLOAT"
     };
 
-    function UniTypeInfo(loc,
-        /** @type {UTypeEnumn} */utype) {
-        this.loc = loc;
-        /** @type {UTypeEnumn} */
-        this.utype = utype;
-        this.value = null;
-    }
-
-    function ShaderOption() {
-        this.vertexColor = null;
-        this.texture0 = null;
-        this.depthTest = true;
-        this.depthWrite = true;
-        this.enableCull = true;
-        this.cullFace = "BACK";
-        this.castShadow = false;
-        this.receiveShadow = false;
-        this.uniformsToUp = {};
-        this.useUV = false;
-        this.IBL = false;
-    }
-
-    var AttributeType = {
-        vertexPos: true,
-        types: {}
+    const TextureType = {
+        default: "TEXTURE_2D",
+        cube: "TEXTURE_CUBE_MAP"
+    };
+    const TextureFormat = {
+        default: "RGBA",
+        RGB: "RGB"
     };
 
-    function AttributesInfo() {
-        this.vertexPos = -1;
-        this.vertexColor = -1;
-        this.uv = -1;
-        this.vertexNormal = -1;
-        this.vertexTangent = -1;
-    }
-
-    const UTypeEnumn$1 = {
-        Mat4: "uniformMatrix4fv",
-        Mat3: "uniformMatrix3fv",
-        Vec4: "uniform4fv",
-        Vec3: "uniform3fv",
-        Vec2: "uniform2fv",
-        float: "uniform1f",
-        texture: "uniform1i",
-        vec2i: "uniform2iv",
-        vec3i: "uniform3iv",
-        vec4i: "uniform4iv"
-
+    const TextureWrap = {
+        default: "CLAMP_TO_EDGE",
+        clamp_to_border: "CLAMP_TO_BORDER",
+        repeat: "REPEAT"
     };
 
-    function UniformsInfo() {
-        /** @type {UniTypeInfo} */
-        this.projectionMatrix = new UniTypeInfo(null, UTypeEnumn$1.Mat4);
-        this.modelViewMatrix = new UniTypeInfo(null, UTypeEnumn$1.Mat4);
-    }
+    const TextureUrl = {
+        camera: "Camera",
+        null: "null"
+    };
 
-    function ProgramInfo(/**@type {WebGLProgram}*/program,
-        /**@type {AttributesInfo} */
-        attribLocations,
-        /**@type {UniformsInfo} */
-        uniformLocations,
-            /**@type {UniformsInfo} */shaderOps) {
-        this.program = program;
-        /**@type {AttributesInfo} */
-        this.attribLocations = attribLocations;
-        /**@type {UniformsInfo} */
-        this.uniformLocations = uniformLocations;
-        /**@type {ShaderOption} */
-        this.shaderOption = shaderOps;
+    const TextureBlend = {
+        Add: 1,
+        multi: 2
+    };
 
-    }
-
-    class Program {
-        constructor(/** @type {WebGLRenderingContext}*/ gl,
-            vsSource, fsSource,
-             /**@type {ShaderOption}*/shaderOps) {
-            // this.pAttrList=["vertexPos","vertexColor"],
-            // this.pUniList={projectionMatrix:UTypeEnumn.Mat4,
-            //     modelViewMatrix:UTypeEnumn.Mat4};
-            this.gl = gl;
-            // this.vsSource = vsSource;
-            // this.fsSource = fsSource;
-            /**@type {WebGLProgram} */
-            this.shaderProgram = Program.initialShaderProgram(gl, vsSource, fsSource);
-            /**@type {ProgramInfo} */
-            this.programInfo = Program.createProgramInfo(gl, this.shaderProgram, shaderOps);
+    class ImgLoader {
+        constructor(url) {
+            this.url = url;
+            this.type = TextureType.default;
+            this.elType = TextureElemType.default;
+            this.format = TextureFormat.default;
         }
+        load(callback) {
+            var that = this;
+            if (this.url.indexOf(".hdr") >= 0) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", this.url, true);
+                xhr.responseType = "arraybuffer";
+                xhr.crossOrigin = "anonymous";
+                that.elType = TextureElemType.float;
+                that.format = TextureFormat.RGB;
+                xhr.onload = function (evt) {
+                    var buff = xhr.response;
+                    if (buff) {
 
-        updateUniform(key,/** @type {UTypeEnumn}*/type,
-            value) {
-            var uni = this.programInfo.uniformLocations[key];
-            if (uni === undefined) {
-                var loc = this.gl.getUniformLocation(this.shaderProgram, key);
-                if (loc !== (null )) {
-                    this.programInfo.uniformLocations[key] = new UniTypeInfo(loc, type);
-                    this.programInfo.uniformLocations[key].value = value;
-                    return true;
-                } else {
-                    console.warn("there is no " + key + "in the complied shader ");
-                    return false;
-                }
-            }
-            uni.value = value;
-            return true;
-        }
+                        var img = new RGBEParser(that.elType).parse(buff);
+                        that.width = img.width;
+                        that.height = img.height;
+                        if (callback) {
+                            callback(that, img.data);
+                        }
+                    }
+                };
+                xhr.send();
+            } else {
+                var image = new Image();
 
-        static loadShader(/** @type {WebGLRenderingContext} */gl,
-            type, source) {
-            const shader = gl.createShader(type);
-            gl.shaderSource(shader, source);
-            //console.log(source);
-            gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                var info = gl.getShaderInfoLog(shader);
-                alert("shader complier error type = " + type + " info=" + info);
-                gl.deleteShader(shader);
-                return null;
-            }
-            return shader;
-        }
+                image.crossOrigin = "anonymous";
 
-        static initialShaderProgram(/** @type {WebGLRenderingContext} */gl,
-            vsSource, fsSource) {
-            const vs = Program.loadShader(gl, gl.VERTEX_SHADER, vsSource);
-            if (vs === null) {
-                console.error("vertex shader got something wrong", vsSource);
+                image.onload = function (ev) {
+                    that.width = image.width;
+                    that.height = image.height;
+                    if (callback) {
+                        callback(that, image);
+                    }
+                };
+                image.src = this.url;
             }
-            const fs = Program.loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
-            if (fs === null) {
-                console.error("fragment shader got something wrong", fsSource);
-            }
-            const shaderProgram = gl.createProgram();
-            // console.log("vertexShader::>>",vsSource);
-            //console.log("fragmentShader::>>",fsSource);
-            gl.attachShader(shaderProgram, vs);
-            gl.attachShader(shaderProgram, fs);
-            gl.linkProgram(shaderProgram);
-            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                alert("unable to initialize the shader program:" + gl.getProgramInfoLog(shaderProgram));
-                // why not delete program ??
-                gl.deleteProgram(shaderProgram);
-                return null;
-            }
-            return shaderProgram;
-        }
 
-
-
-        static createProgramInfo(/**@type {WebGLRenderingContext}*/gl,
-            shaderProgram,
-            /**@type {ShaderOption}*/shaderOps
-        ) {
-            var attributes = new AttributesInfo();
-            for (var attr in attributes) {
-                // if(shaderOps[attr] !==false){
-                var loc = gl.getAttribLocation(shaderProgram, attr);
-                if (loc !== -1 && loc !== null && loc !== undefined) {
-                    attributes[attr] = loc;
-                }
-
-                //}
-            }
-            var uniforms = new UniformsInfo();
-            for (var uni in uniforms) {
-                //if(shaderOps[uni] !==false){
-                var uloc = gl.getUniformLocation(shaderProgram, uni);
-                if (uloc !== -1 && uloc !== null && uloc !== undefined) {
-                    uniforms[uni].loc = uloc;
-                }
-                //}
-            }
-            var programInfo = new ProgramInfo(shaderProgram, attributes, uniforms, shaderOps);
-            return programInfo;
         }
     }
+    class Texture {
+        constructor(url, width, height, type) {
+            this.url = url;
+            /**@type {WebGLTexture} */
+            this.glTexture = null;
+            this.state = LoadState.init;
+            this.cubeMapHint = null;
+            this.width = width;
+            this.height = height;
+            this.elType = TextureElemType.default;
+            this.format = TextureFormat.default;
+            this.hasMipMap = true;
+            this.wrap_mode = TextureWrap.default;
+            if (MathUtil.isNone(type)) {
+                this.type = "TEXTURE_2D";
+            } else {
+                this.type = type;
+            }
+            if (MathUtil.isNone(width)) {
+                this.width = 1;
+            }
+            if (MathUtil.isNone(height)) {
+                this.height = 1;
+            }
+            this.id = Texture.createId();
+            console.log("constructor:texture >>>id=", this.id, "url=", this.url);
+            this.onLoadedCalls = [];
+            this.mipCount = -1;
+        }
+        getId() {
+            return this.id;
+        }
+        getMipCount() {
+            if (this.width === 1 && this.height === 1) {
+                console.error("Texture: not initialized ,url=", this.url);
+                return -1;
+            }
+
+            if (this.mipCount === -1) {
+                var minw = this.width < this.height ? this.width : this.height;
+                this.mipCount = Math.log(minw) * Math.LOG2E;
+            }
+            return this.mipCount;
+        }
+        static createId() {
+            Texture.id = Texture.id + 1;
+            return Texture.id;
+        }
+        onLoaded() {
+            for (var i in this.onLoadedCalls) {
+                this.onLoadedCalls[i](this);
+            }
+        }
+
+        bindDefaultColor(/**@type {WebGLRenderingContext} */gl, r, g, b, a) {
+            if (this.type !== "TEXTURE_2D") {
+                return;
+            }
+            if (this.glTexture === null) {
+                this.glTexture = gl.createTexture();
+            }
+            var defaultPxs = new Uint8Array([r * 255, g * 255, b * 255, a * 255]);
+            Texture.uploadTextureData(gl, this, defaultPxs, false, false, 1, 1);
+        }
+        static uploadTextureData(/**@type {WebGLRenderingContext} */gl,
+            /**@type {Texture} */
+            tex, data, isFlip, hasMipMap, fixw, fixh) {
+
+            var level = 0;
+            var format = gl.RGBA;
+            if (!MathUtil.isNone(tex.format)) {
+                format = gl[tex.format];
+            }
+            var internalFormat = format;
+            var width = tex.width;
+            var height = tex.height;
+            if (!MathUtil.isNone(fixw)) {
+                width = fixw;
+            }
+            if (!MathUtil.isNone(fixh)) {
+                height = fixh;
+            }
+            var eltype = gl[tex.elType];
+            var type = gl[tex.type];
+            // if(tex.elType === TextureElemType.float){
+            //     internalFormat = gl.RGB16F;
+            // }
+
+            console.log("upload Tex,", tex.elType);
+            gl.bindTexture(type, tex.glTexture);
+            //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !isFlip);
+            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+            if (tex.elType === TextureElemType.float) {
+                var ext = gl.getExtension('OES_texture_float');
+                console.log("support >> OES_texture_float", ext);
+                var ext2 = gl.getExtension('OES_texture_float_linear');
+                console.log("support >> OES_texture_float_linear", ext2);
+                tex.wrap_mode = TextureWrap.default;
+            }
+            //console.log("should flip",isFlip);
+            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
+            if (type === gl.TEXTURE_CUBE_MAP) {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                for (var j = 0; j < 6; j++) {
+                    // var ke = "TEXTURE_CUBE_MAP_"+tex.cubeMapHint[j];
+                    //  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
+                    if (data === null) {
+                        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, width, height, 0, format, eltype, null);
+                    } else {
+                        if (data[j] instanceof Image) {
+                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, format, eltype, data[j]);
+                        } else {
+                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, width, height, 0, format, eltype, data[j]);
+                        }
+                    }
+
+
+                }
+            } else if (data instanceof Image) {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, isFlip);
+                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, eltype, data);
+            } else {
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, isFlip);
+                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, 0, format, eltype, data);
+            }
+            gl.texParameteri(type, gl.TEXTURE_WRAP_S, gl[tex.wrap_mode]);
+            gl.texParameteri(type, gl.TEXTURE_WRAP_T, gl[tex.wrap_mode]);
+
+
+            gl.LINEAR;
+            var hasET = true;
+            if (tex.elType === TextureElemType.float) {
+                var et1 = gl.getExtension('OES_texture_float');
+                var et2 = gl.getExtension('OES_texture_float_linear');
+                if (et1 === undefined || et2 === undefined) {
+                    hasET = false;
+                    alert("not supported");
+                }
+            }
+            //gl.getExtension('EXT_shader_texture_lod');
+            //gl.getExtension('OES_standard_derivatives');
+            // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,filter);
+            //gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,filter);
+            var isP2 = MathUtil.isPowerOf2(tex.width) && MathUtil.isPowerOf2(tex.height);
+            if (hasMipMap && tex.hasMipMap) {
+                if (isP2) {
+                    // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.NEAREST_MIPMAP_LINEAR);
+                    //gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+                    if (tex.elType === TextureElemType.float) {
+                        if (hasET) {
+                            // gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                            //console.log("errorstate1",gl.getError());
+                            gl.generateMipmap(type);
+
+                            if (MDBrowser === "Chrome") { //todo
+                                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+                                console.log("Texture>>>>chrome>> use mipmap filter", tex.id);
+                            } else {
+                                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                                // gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+                                // console.log("Texture>>>>not chrome >> liner",tex.id);
+                            }
+
+
+                        }
+                    } else {
+                        gl.generateMipmap(type);
+                        gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                        console.log("Texture>>>>>not chrome >> 3333", tex.id);
+
+                    }
+
+
+                }
+            }
+            if (!isP2) {
+                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            }
+            gl.bindTexture(type, null);
+
+        }
+
+        static loadCubeTexture(/**@type {WebGLRenderingContext} */gl,
+            /**@type {Texture} */
+            tex, loadCallback) {
+            if (tex.glTexture === null) {
+                tex.glTexture = gl.createTexture();
+            }
+            tex.state = LoadState.loading;
+            var loaded = 0;
+            var imgs = {};
+            for (var i = 0; i < 6; i++) {
+                var ui = tex.url[i];
+                var imgL = new ImgLoader(ui);
+                imgL.index = i;
+                imgL.load(function (loader, data) {
+                    loaded += 1;
+                    imgs[loader.index] = data;
+                    if (loaded === 6) {
+                        tex.width = loader.width; tex.height = loader.height;
+                        tex.format = loader.format;
+                        tex.elType = loader.elType;
+                        Texture.uploadTextureData(gl, tex, imgs, true, true);
+                        tex.state = LoadState.loaded;
+                        loadCallback(tex);
+
+                    }
+
+                });
+
+            }
+
+        }
+
+        static loadNullTexture(/**@type {WebGLRenderingContext} */gl,
+            /**@type {Texture} */
+            tex, loadCallback) {
+            if (tex.glTexture === null) {
+                tex.glTexture = gl.createTexture();
+            }
+            tex.state = LoadState.loading;
+            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            Texture.uploadTextureData(gl, tex, null, false, true);
+            // tex.loadCallback = loadCallback;
+        }
+
+        loadTexture(/**@type {WebGLRenderingContext} */gl,
+            loadCallback) {
+            var tex = this;
+            if (tex.url === TextureUrl.camera || MathUtil.isNone(tex.url)) {
+                Texture.loadNullTexture(gl, tex, loadCallback);
+
+                return;
+            }
+            if (tex.url instanceof (Array)) {
+                Texture.loadCubeTexture(gl, tex, loadCallback);
+                return;
+            }
+            if (tex.glTexture === null) {
+                tex.glTexture = gl.createTexture();
+            }
+            tex.state = LoadState.loading;
+            var that = this;
+
+            var imgL = new ImgLoader(tex.url);
+            imgL.load(function (loader, img) {
+                that.width = loader.width; that.height = loader.height;
+                that.format = loader.format; that.type = loader.type;
+                that.elType = loader.elType;
+                Texture.uploadTextureData(gl, that, img, true, true);
+                that.state = LoadState.loaded;
+                loadCallback(tex);
+
+
+            });
+
+        }
+    }
+    Texture.id = 0;
 
     /*
      * @Author: Sophie
@@ -1055,10 +1405,10 @@ var Mad = (function (exports) {
                 //     console.error("utype is null",uni,utype);
                 // }
                 // console.log(uni,uniL.loc);
-                if (utype === UTypeEnumn$1.Mat3 || utype === UTypeEnumn$1.Mat4) {
+                if (utype === UTypeEnumn.Mat3 || utype === UTypeEnumn.Mat4) {
                     gl[utype](uniL.loc, false, uniVal);
                     //todo problem  some smaller picture may get loaded faster, but texInd????
-                } else if (utype === UTypeEnumn$1.texture) {
+                } else if (utype === UTypeEnumn.texture) {
                     if (uniVal.state === LoadState.loaded) {
                         gl.activeTexture(gl["TEXTURE" + texInd]);
                         gl.bindTexture(gl[uniVal.type], uniVal.glTexture);
@@ -1388,6 +1738,474 @@ var Mad = (function (exports) {
     /*
      * @Author: Sophie
      * @email: bajie615@126.com
+     * @Date: 2020-02-18 16:17:02
+     * @Description: file content
+     */
+
+    class SubPass {
+        constructor(/**@type */mat, camera) {
+            this.material = mat;
+            this.targetType = CameraType.default;
+            this.targetCam = null;
+            this.setTarget(camera);
+
+        }
+        setTarget(camera) {
+            if (MathUtil.isNone(camera)) {
+                this.targetType = CameraType.default;
+            } else if (camera instanceof Camera) {
+                this.targetCam = camera;
+                this.targetType = camera.type;
+            } else {
+                this.targetType = camera;
+            }
+        }
+        getActive(/**@type {Camera} */cam, drawCall) {
+            var that = this;
+            if (this.targetCam !== null) {
+                drawCall(that.material, that.targetCam);
+            } else {
+                drawCall(that.material, cam);
+            }
+        }
+    }
+
+    class Pass {
+        //for hdr_fist
+        //active Material
+        //current target A, 
+
+        //for bloom
+        //pass1, draw color1 to A, target:A
+        //pass2, loop:5 subP1:draww A to B, target:B, subP2:drawB to A
+        //pass3, draw color1, A to currentCam
+
+        // for depth
+        //pass1, special target:
+        constructor(/**@type {Material} */mat, camera) {
+
+            this.subList = [new SubPass(mat, camera)];
+            this.loop = 1;
+        }
+
+        getActive(/**@type {Camera} */cam, drawCall) {
+            for (var i = 0; i < this.loop; i++) {
+                for (var k in this.subList) {
+                    var subP = this.subList[k];
+                    subP.getActive(cam, drawCall);
+                }
+
+
+            }
+        }
+    }
+
+    class PassLayer {
+        setTarget(camera) {
+            if (MathUtil.isNone(camera)) {
+                this.targetType = CameraType.default;
+            } else if (camera instanceof Camera) {
+                this.targetCam = camera;
+                this.targetType = camera.type;
+            } else {
+                this.targetType = camera;
+            }
+        }
+        constructor(/**@type {Material} */mat, camera) {
+            this.passList = [new Pass(mat, camera)];
+            this.targetType = CameraType.default;
+            this.targetCam = null;
+            this.setTarget(camera);
+        }
+
+        add(mat, camera, passIndex) {
+            var lenp = this.passList.length;
+            if (passIndex > lenp) {
+                console.error("out of index range,length=", lenp, "index=", passIndex);
+                return false;
+            }
+            if (passIndex == lenp) {
+                this.passList.push(new Pass(mat, camera));
+            } else {
+                var pass = this.passList[passIndex];
+                pass.subList.push(new SubPass(mat, camera));
+            }
+
+        }
+
+        getActive(/**@type {Camera} */cam, drawCall) {
+            for (var i in this.passList) {
+                var pass = this.passList[i];
+                pass.getActive(cam, drawCall);
+            }
+        }
+
+    }
+
+    /*
+     * @Author: Sophie
+     * @email: bajie615@126.com
+     * @Date: 2020-01-19 14:07:05
+     * @Description: file content
+     */
+
+
+    function MatUni(/**@type {string}*/key,
+        /**@type {UTypeEnumn}*/type,
+        value) {
+        this.key = key;
+        this.type = type;
+        this.value = value;
+        this.dirty = true;
+    }
+
+    class TextureManager {
+        constructor() {
+            // this.texMap ={};  // key texId, value: tex
+            this.texMatMap = {}; // key texId, value :material
+        }
+        onTexLoaded(tex) {
+            if (tex.state === LoadState.loaded) {
+                var matList = this.texMatMap[tex.getId()];
+                if (!MathUtil.isNone(matList)) {
+                    for (var i = 0; i < matList.length; i++) {
+                        matList[i].onTexLoaded(tex);
+                    }
+                    ("TextureManager tex finished loaded url = " + tex.url);
+                }
+                tex.onLoaded(tex);
+            }
+        }
+        static getManager() {
+            if (TextureManager.manager === null) {
+                TextureManager.manager = new TextureManager();
+            }
+            return TextureManager.manager;
+        }
+    }
+    TextureManager.manager = null;
+
+    class Material {
+        constructor() {
+            /**@type {ShaderOption} */
+            this.shaderOption = new ShaderOption();
+            this.id = Material.createId();
+            this.fsource = null;
+            this.vsource = null;
+            /**@type {Program} */
+            this.program = null;
+            this.dirty = true;
+            this.matUniList = {};
+            this.uDirty = true;
+            this.loadedCallBack = null;
+            /**@type {Array}*
+             * element @type {Texture}
+             */
+            this.texList = [];
+            this.texLoadedCount = 0;
+
+            this.passLayers = [new PassLayer(this, CameraType.default)];
+            this.texPrepared = false;
+        }
+        updateUnis(/**@type {WebGLRenderingContext} */gl) {
+            if (this.uDirty) {
+                for (var key in this.matUniList) {
+                    var uni = this.matUniList[key];
+                    if (uni.dirty) {
+                        this.program.updateUniform(uni.key, uni.type, uni.value);
+                        this.matUniList[key].dirty = false;
+                    }
+                }
+                this.uDirty = false;
+            }
+        }
+
+        setUniform(/**@type {string} */ key,
+            /**@type {UTypeEnumn} */type,
+            value) {
+            if (key in this.matUniList) {
+                this.matUniList[key].type = type;
+                this.matUniList[key].value = value;
+                this.matUniList[key].dirty = true;
+            } else {
+                this.matUniList[key] = new MatUni(key, type, value);
+            }
+            this.uDirty = true;
+        }
+
+        update(/**@type {WebGLRenderingContext} */gl) {
+            if (this.dirty) {
+                // material may share program so ??? todo
+                this.dirty = false;
+                delete this.program;
+                this.program = new Program(gl, this.vsource, this.fsource, this.shaderOption);
+                this.loadTexs(gl);
+            }
+            if (this.uDirty) {
+                this.updateUnis(gl);
+            }
+        }
+
+        onTexLoaded(tex) {
+            this.texLoadedCount += 1;
+            if (this.texLoadedCount === this.texList.length) {
+                if (this.loadedCallBack !== null) {
+                    this.loadedCallBack(this.texList);
+                    console.log("material finished loading");
+                }
+                this.texPrepared = true;
+            }
+
+        }
+
+        loadTexs(/**@type {WebGLRenderingContext} */gl) {
+            for (var i in this.texList) {
+                /**@type {Texture} */
+                var tex = this.texList[i];
+                //tex.bindDefaultColor(gl,1.0,1.0,1.0,1.0);
+                if (tex.state === LoadState.init) {
+                    tex.loadTexture(gl, function (
+                        /** @type {Texture} */tex) {
+                        // that.uDirty = true;
+                        TextureManager.getManager().onTexLoaded(tex);
+                    });
+                }
+            }
+        }
+
+        addTexture(tex) {
+            var manager = TextureManager.getManager();
+            var id = tex.getId();
+            if (manager.texMatMap[id] === undefined) {
+                manager.texMatMap[id] = [];
+            }
+            manager.texMatMap[id].push(this);
+            this.texList.push(tex);
+        }
+
+        getProgramInfo(/**@type {WebGLRenderingContext} */gl) {
+            this.update(gl);
+            return this.program.programInfo;
+        }
+        static createId() {
+            Material.id = Material.id + 1;
+            return Material.id;
+        }
+
+        setLightShadowParams(light, t) {
+            var dkey = "depthMap[" + t + "]";
+            this.setUniform(dkey, UTypeEnumn.texture,
+                light.shadowCam.renderTarget);
+            this.addTexture(light.shadowCam.renderTarget);
+            var pkey = "biasStep[" + t + "]";
+            this.setUniform(pkey, UTypeEnumn.Vec2, [light.shadowBias, light.shadowSmoothStep]);
+
+        }
+
+        //{ layerPass1:{Pass1:{subPass1,subPass2}, Pass2:{subPass1} },
+        //  layerPass2:{pass1;{subPass1}} }
+
+
+        getActive(/**@type {Camera} */cam, drawCall) {
+            var size = this.passLayers.length;
+            if (size === 1) {
+                this.passLayers[0].getActive(cam, drawCall);
+                return;
+            } else {
+                for (var i in this.passLayers) {
+                    var layer = this.passLayers[i];
+                    if (layer.targetType === cam.type) {
+                        if (!MathUtil.isNone(layer.targetCam)) {
+                            layer.getActive(layer.targetCam, drawCall);
+                        } else {
+                            layer.getActive(cam, drawCall);
+                        }
+                        return;
+                    }
+
+                }
+            }
+            this.passLayers[0].getActive(cam, drawCall);
+
+        }
+
+
+
+        addPassLayer(mat,/**@type {Camera} */cam) {
+            this.passLayers.push(new PassLayer(mat, cam));
+        }
+    }
+    Material.id = 0;
+
+    /*
+     * @Author: Sophie
+     * @email: bajie615@126.com
+     * @Date: 2020-02-08 18:43:05
+     * @Description: file content
+     */
+
+    class RenderTexture extends Texture {
+        constructor(url, width, height, type) {
+            super(url, width, height, type);
+            this.depthRBuffer = null;
+            this.hasColorBuffer = true;
+            this.frameBufferId = null;
+            this.assitColorBuffers = null;
+            this.currentFace = -1;
+            this.currentMip = 0;
+        }
+
+        loadTexture(/**@type {WebGLRenderingContext} */gl,
+            loadCallback) {
+
+            if (!this.hasColorBuffer) {
+                var ext = gl.getExtension("WEBGL_depth_texture");
+                console.log(ext);
+                super.format = "DEPTH_COMPONENT";
+                //rbf_format = gl.DEPTH_COMPONENT;
+                super.elType = "UNSIGNED_SHORT";
+                this.hasMipMap = false;
+            } else {
+                this.depthRBuffer = gl.createRenderbuffer();
+                gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthRBuffer);
+                gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, this.width, this.height);
+
+            }
+            //gl.bindRenderbuffer(gl.RENDERBUFFER,0);
+            this.frameBufferId = gl.createFramebuffer();
+            if (this.elType === TextureElemType.float) {
+                gl.getExtension('WEBGL_color_buffer_float');
+            }
+            this.wrap_mode = TextureWrap.default;
+            super.loadTexture(gl, loadCallback);
+            this.loadAssitColorBuffers(gl);
+
+        }
+
+        loadAssitColorBuffers(/**@type {WebGLRenderingContext} */gl) {
+            if (this.assitColorBuffers !== null) {
+                for (var i = 0; i < this.assitColorBuffers.length; i++) {
+                    this.assitColorBuffers[i].loadTexture(gl, null);
+                }
+            }
+        }
+        uploadColorBuffers(/**@type {WebGLRenderingContext} */gl) {
+            var texTarget = gl.TEXTURE_2D;
+            if (this.type === TextureType.cube) {
+                texTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + this.currentFace;
+            }
+
+            if (this.assitColorBuffers !== null) {
+                var ext = gl.getExtension("WEBGL_draw_buffers");
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, ext.COLOR_ATTACHMENT0_WEBGL, texTarget,
+                    this.glTexture, this.currentMip);
+                var color_attatchs = [ext.COLOR_ATTACHMENT0_WEBGL];
+                for (var i = 0; i < this.assitColorBuffers.length; i++) {
+                    var ctex = this.assitColorBuffers[i];
+                    var t = i + 1;
+                    var colorKey = ext["COLOR_ATTACHMENT" + t + "_WEBGL"];
+                    color_attatchs.push(colorKey);
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, colorKey, texTarget,
+                        ctex.glTexture, this.currentMip);
+                    this.onFrameLoaded(ctex);
+                }
+                ext.drawBuffersWEBGL(color_attatchs);
+            } else {
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texTarget,
+                    this.glTexture, this.currentMip);
+
+            }
+        }
+
+        generateMipMap(/**@type {WebGLRenderingContext} */gl) {
+            if (this.hasMipMap) {
+                var type = gl[this.type];
+                gl.bindTexture(type, this.glTexture);
+                gl.generateMipmap(type);
+                gl.bindTexture(type, null);
+                console.log("produce mipmap");
+            }
+        }
+        onFrameLoaded(tex) {
+            if (tex.state === LoadState.loading) {
+                if (tex.type === TextureType.cube) {
+                    if (tex.currentFace === 5) {
+                        tex.state = LoadState.loaded;
+                        TextureManager.getManager().onTexLoaded(tex);
+                    }
+
+                } else {
+                    tex.state = LoadState.loaded;
+                    TextureManager.getManager().onTexLoaded(tex);
+                }
+
+            }
+        }
+
+        calRotateFace(/**@type {Camera} */ cam) {
+            if (this.currentFace === 5) {
+                this.currentFace = -1;
+            }
+            this.currentFace += 1;
+            var rot = new Vector3(0, 0, 0);
+            cam.transform.resetRotate(0, 0, 0);
+            //default look at negZ
+            switch (this.currentFace) {
+                case 0: //pox
+                    rot.y = 90.0;
+                    rot.x = 180.0;
+                    break;
+                case 1: //nex
+                    //rot.y = 180.0;
+                    rot.y = -90;
+                    rot.x = 180.0;
+                    break;
+                case 2: //poy
+                    //rot.y = 90.0;
+                    //rot.x = 90;
+                    //rot.y = 180;
+                    rot.x = 90;
+                    break;
+                case 3: //negy
+                    //rot.x = -180.0;
+                    //rot.y = 180;
+                    rot.x = -90;
+                    break;
+                case 4:// posz
+                    //rot.x = 90;
+                    //rot.y = 180;
+                    rot.z = 180;
+                    rot.y = -180.0;
+                    break;
+                case 5:
+                    rot.z = 180;
+                    break;
+            }
+            cam.transform.rotate(rot.x, rot.y, rot.z);
+            // cam.transform.rotate(180,-90,0.0);
+        }
+
+        updateFBODate(/**@type {WebGLRenderingContext} */gl, cam) {
+            if (this.type === TextureType.cube) {
+                this.calRotateFace(cam);
+            }
+            if (this.hasColorBuffer) {
+                this.uploadColorBuffers(gl);
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT,
+                    gl.RENDERBUFFER, this.depthRBuffer);
+                gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            } else {
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D,
+                    this.glTexture, 0);
+            }
+            this.onFrameLoaded(this);
+
+        }
+    }
+
+    /*
+     * @Author: Sophie
+     * @email: bajie615@126.com
      * @Date: 2020-02-13 19:53:44
      * @Description: file content
      */
@@ -1613,7 +2431,7 @@ var Mad = (function (exports) {
      * @Description: file content
      */
 
-    const PrimitiveType$1 = {
+    const PrimitiveType = {
         TriangularStrip: 0,
         Point: 1,
         LineStrip: 2,
@@ -1622,7 +2440,7 @@ var Mad = (function (exports) {
         TriangularFan: 5,
         Line: 6,
     };
-    class Mesh$1 {
+    class Mesh {
         constructor() {
             this.vertexPos = null;
             this.vertexColor = null;
@@ -1631,7 +2449,7 @@ var Mad = (function (exports) {
             this.vertexTangent = null;
             this.uv = null;
             this.vertexCount = 0;
-            this.primitiveType = PrimitiveType$1.TriangularStrip;
+            this.primitiveType = PrimitiveType.TriangularStrip;
             /**@type {VertexBufferInfo} */
             this.vertexBufferInfo = null;
             this.dirty = true;
@@ -1645,7 +2463,7 @@ var Mad = (function (exports) {
         updateStates(/**@type {WebGLRenderingContext} */ gl) {
             if (this.stateDirty) {
                 //update states:
-                var glPrimitive = Mesh$1.switchToGLPrimType(gl, this.primitiveType);
+                var glPrimitive = Mesh.switchToGLPrimType(gl, this.primitiveType);
                 this.vertexBufferInfo.primitiveType = glPrimitive;
                 this.stateDirty = false;
             }
@@ -1734,31 +2552,31 @@ var Mad = (function (exports) {
         static switchToGLPrimType(/**@type {WebGLRenderingContext}*/ gl, pType) {
             var gType = gl.TRIANGLE_STRIP;
             switch (pType) {
-                case PrimitiveType$1.TriangularStrip:
+                case PrimitiveType.TriangularStrip:
                     break;
-                case PrimitiveType$1.LineStrip:
+                case PrimitiveType.LineStrip:
                     gType = gl.LINE_STRIP;
                     break;
-                case PrimitiveType$1.LineLoop:
+                case PrimitiveType.LineLoop:
                     gType = gl.LINE_LOOP;
                     break;
-                case PrimitiveType$1.Triangular:
+                case PrimitiveType.Triangular:
                     gType = gl.TRIANGLES;
                     break;
-                case PrimitiveType$1.TriangularFan:
+                case PrimitiveType.TriangularFan:
                     gType = gl.TRIANGLE_FAN;
                     break;
-                case PrimitiveType$1.Point:
+                case PrimitiveType.Point:
                     gType = gl.POINTS;
                     break;
-                case PrimitiveType$1.Line:
+                case PrimitiveType.Line:
                     gType = gl.LINES;
             }
             return gType;
         }
 
         static createFromArray(vertexNums, posArr, colorArr = null) {
-            var mesh = new Mesh$1();
+            var mesh = new Mesh();
             mesh.vertexCount = vertexNums;
             mesh.vertexPos = posArr;
             mesh.vertexColor = colorArr;
@@ -1773,7 +2591,7 @@ var Mad = (function (exports) {
      * @Description: file content
      */
 
-    class GridMesh$1 extends Mesh$1 {
+    class GridMesh extends Mesh {
         constructor(params) {
             super();
             this.w = params.w === undefined ? 1 : params.w;
@@ -2640,658 +3458,6 @@ var Mad = (function (exports) {
     /*
      * @Author: Sophie
      * @email: bajie615@126.com
-     * @Date: 2020-02-18 16:17:02
-     * @Description: file content
-     */
-
-    class SubPass {
-        constructor(/**@type */mat, camera) {
-            this.material = mat;
-            this.targetType = CameraType.default;
-            this.targetCam = null;
-            this.setTarget(camera);
-
-        }
-        setTarget(camera) {
-            if (MathUtil.isNone(camera)) {
-                this.targetType = CameraType.default;
-            } else if (camera instanceof Camera) {
-                this.targetCam = camera;
-                this.targetType = camera.type;
-            } else {
-                this.targetType = camera;
-            }
-        }
-        getActive(/**@type {Camera} */cam, drawCall) {
-            var that = this;
-            if (this.targetCam !== null) {
-                drawCall(that.material, that.targetCam);
-            } else {
-                drawCall(that.material, cam);
-            }
-        }
-    }
-
-    class Pass {
-        //for hdr_fist
-        //active Material
-        //current target A, 
-
-        //for bloom
-        //pass1, draw color1 to A, target:A
-        //pass2, loop:5 subP1:draww A to B, target:B, subP2:drawB to A
-        //pass3, draw color1, A to currentCam
-
-        // for depth
-        //pass1, special target:
-        constructor(/**@type {Material} */mat, camera) {
-
-            this.subList = [new SubPass(mat, camera)];
-            this.loop = 1;
-        }
-
-        getActive(/**@type {Camera} */cam, drawCall) {
-            for (var i = 0; i < this.loop; i++) {
-                for (var k in this.subList) {
-                    var subP = this.subList[k];
-                    subP.getActive(cam, drawCall);
-                }
-
-
-            }
-        }
-    }
-
-    class PassLayer {
-        setTarget(camera) {
-            if (MathUtil.isNone(camera)) {
-                this.targetType = CameraType.default;
-            } else if (camera instanceof Camera) {
-                this.targetCam = camera;
-                this.targetType = camera.type;
-            } else {
-                this.targetType = camera;
-            }
-        }
-        constructor(/**@type {Material} */mat, camera) {
-            this.passList = [new Pass(mat, camera)];
-            this.targetType = CameraType.default;
-            this.targetCam = null;
-            this.setTarget(camera);
-        }
-
-        add(mat, camera, passIndex) {
-            var lenp = this.passList.length;
-            if (passIndex > lenp) {
-                console.error("out of index range,length=", lenp, "index=", passIndex);
-                return false;
-            }
-            if (passIndex == lenp) {
-                this.passList.push(new Pass(mat, camera));
-            } else {
-                var pass = this.passList[passIndex];
-                pass.subList.push(new SubPass(mat, camera));
-            }
-
-        }
-
-        getActive(/**@type {Camera} */cam, drawCall) {
-            for (var i in this.passList) {
-                var pass = this.passList[i];
-                pass.getActive(cam, drawCall);
-            }
-        }
-
-    }
-
-    /*
-     * @Author: Sophie
-     * @email: bajie615@126.com
-     * @Date: 2020-01-19 14:07:05
-     * @Description: file content
-     */
-
-
-    function MatUni(/**@type {string}*/key,
-        /**@type {UTypeEnumn}*/type,
-        value) {
-        this.key = key;
-        this.type = type;
-        this.value = value;
-        this.dirty = true;
-    }
-
-    class TextureManager$1 {
-        constructor() {
-            // this.texMap ={};  // key texId, value: tex
-            this.texMatMap = {}; // key texId, value :material
-        }
-        onTexLoaded(tex) {
-            if (tex.state === LoadState.loaded) {
-                var matList = this.texMatMap[tex.getId()];
-                if (!MathUtil.isNone(matList)) {
-                    for (var i = 0; i < matList.length; i++) {
-                        matList[i].onTexLoaded(tex);
-                    }
-                    ("TextureManager tex finished loaded url = " + tex.url);
-                }
-                tex.onLoaded(tex);
-            }
-        }
-        static getManager() {
-            if (TextureManager$1.manager === null) {
-                TextureManager$1.manager = new TextureManager$1();
-            }
-            return TextureManager$1.manager;
-        }
-    }
-    TextureManager$1.manager = null;
-
-    class Material {
-        constructor() {
-            /**@type {ShaderOption} */
-            this.shaderOption = new ShaderOption();
-            this.id = Material.createId();
-            this.fsource = null;
-            this.vsource = null;
-            /**@type {Program} */
-            this.program = null;
-            this.dirty = true;
-            this.matUniList = {};
-            this.uDirty = true;
-            this.loadedCallBack = null;
-            /**@type {Array}*
-             * element @type {Texture}
-             */
-            this.texList = [];
-            this.texLoadedCount = 0;
-
-            this.passLayers = [new PassLayer(this, CameraType.default)];
-            this.texPrepared = false;
-        }
-        updateUnis(/**@type {WebGLRenderingContext} */gl) {
-            if (this.uDirty) {
-                for (var key in this.matUniList) {
-                    var uni = this.matUniList[key];
-                    if (uni.dirty) {
-                        this.program.updateUniform(uni.key, uni.type, uni.value);
-                        this.matUniList[key].dirty = false;
-                    }
-                }
-                this.uDirty = false;
-            }
-        }
-
-        setUniform(/**@type {string} */ key,
-            /**@type {UTypeEnumn} */type,
-            value) {
-            if (key in this.matUniList) {
-                this.matUniList[key].type = type;
-                this.matUniList[key].value = value;
-                this.matUniList[key].dirty = true;
-            } else {
-                this.matUniList[key] = new MatUni(key, type, value);
-            }
-            this.uDirty = true;
-        }
-
-        update(/**@type {WebGLRenderingContext} */gl) {
-            if (this.dirty) {
-                // material may share program so ??? todo
-                this.dirty = false;
-                delete this.program;
-                this.program = new Program(gl, this.vsource, this.fsource, this.shaderOption);
-                this.loadTexs(gl);
-            }
-            if (this.uDirty) {
-                this.updateUnis(gl);
-            }
-        }
-
-        onTexLoaded(tex) {
-            this.texLoadedCount += 1;
-            if (this.texLoadedCount === this.texList.length) {
-                if (this.loadedCallBack !== null) {
-                    this.loadedCallBack(this.texList);
-                    console.log("material finished loading");
-                }
-                this.texPrepared = true;
-            }
-
-        }
-
-        loadTexs(/**@type {WebGLRenderingContext} */gl) {
-            for (var i in this.texList) {
-                /**@type {Texture} */
-                var tex = this.texList[i];
-                //tex.bindDefaultColor(gl,1.0,1.0,1.0,1.0);
-                if (tex.state === LoadState.init) {
-                    tex.loadTexture(gl, function (
-                        /** @type {Texture} */tex) {
-                        // that.uDirty = true;
-                        TextureManager$1.getManager().onTexLoaded(tex);
-                    });
-                }
-            }
-        }
-
-        addTexture(tex) {
-            var manager = TextureManager$1.getManager();
-            var id = tex.getId();
-            if (manager.texMatMap[id] === undefined) {
-                manager.texMatMap[id] = [];
-            }
-            manager.texMatMap[id].push(this);
-            this.texList.push(tex);
-        }
-
-        getProgramInfo(/**@type {WebGLRenderingContext} */gl) {
-            this.update(gl);
-            return this.program.programInfo;
-        }
-        static createId() {
-            Material.id = Material.id + 1;
-            return Material.id;
-        }
-
-        setLightShadowParams(light, t) {
-            var dkey = "depthMap[" + t + "]";
-            this.setUniform(dkey, UTypeEnumn$1.texture,
-                light.shadowCam.renderTarget);
-            this.addTexture(light.shadowCam.renderTarget);
-            var pkey = "biasStep[" + t + "]";
-            this.setUniform(pkey, UTypeEnumn$1.Vec2, [light.shadowBias, light.shadowSmoothStep]);
-
-        }
-
-        //{ layerPass1:{Pass1:{subPass1,subPass2}, Pass2:{subPass1} },
-        //  layerPass2:{pass1;{subPass1}} }
-
-
-        getActive(/**@type {Camera} */cam, drawCall) {
-            var size = this.passLayers.length;
-            if (size === 1) {
-                this.passLayers[0].getActive(cam, drawCall);
-                return;
-            } else {
-                for (var i in this.passLayers) {
-                    var layer = this.passLayers[i];
-                    if (layer.targetType === cam.type) {
-                        if (!MathUtil.isNone(layer.targetCam)) {
-                            layer.getActive(layer.targetCam, drawCall);
-                        } else {
-                            layer.getActive(cam, drawCall);
-                        }
-                        return;
-                    }
-
-                }
-            }
-            this.passLayers[0].getActive(cam, drawCall);
-
-        }
-
-
-
-        addPassLayer(mat,/**@type {Camera} */cam) {
-            this.passLayers.push(new PassLayer(mat, cam));
-        }
-    }
-    Material.id = 0;
-
-    /*
-     * @Author: Sophie
-     * @email: bajie615@126.com
-     * @Date: 2020-02-09 21:04:12
-     * @Description: file content
-     */
-
-    var LoadState$1 = {
-        init: 0,
-        loading: 1,
-        loaded: 2
-    };
-    var TextureElemType$1 = {
-        default: "UNSIGNED_BYTE",
-        float: "FLOAT",
-        halfFloat: "HALFFLOAT"
-    };
-
-    var TextureType$1 = {
-        default: "TEXTURE_2D",
-        cube: "TEXTURE_CUBE_MAP"
-    };
-    var TextureFormat = {
-        default: "RGBA",
-        RGB: "RGB"
-    };
-
-    var TextureWrap$1 = {
-        default: "CLAMP_TO_EDGE",
-        clamp_to_border: "CLAMP_TO_BORDER",
-        repeat: "REPEAT"
-    };
-
-    var TextureUrl = {
-        camera: "Camera",
-        null: "null"
-    };
-
-    const TextureBlend = {
-        Add: 1,
-        multi: 2
-    };
-
-    class ImgLoader {
-        constructor(url) {
-            this.url = url;
-            this.type = TextureType$1.default;
-            this.elType = TextureElemType$1.default;
-            this.format = TextureFormat.default;
-        }
-        load(callback) {
-            var that = this;
-            if (this.url.indexOf(".hdr") >= 0) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", this.url, true);
-                xhr.responseType = "arraybuffer";
-                xhr.crossOrigin = "anonymous";
-                that.elType = TextureElemType$1.float;
-                that.format = TextureFormat.RGB;
-                xhr.onload = function (evt) {
-                    var buff = xhr.response;
-                    if (buff) {
-
-                        var img = new RGBEParser(that.elType).parse(buff);
-                        that.width = img.width;
-                        that.height = img.height;
-                        if (callback) {
-                            callback(that, img.data);
-                        }
-                    }
-                };
-                xhr.send();
-            } else {
-                var image = new Image();
-
-                image.crossOrigin = "anonymous";
-
-                image.onload = function (ev) {
-                    that.width = image.width;
-                    that.height = image.height;
-                    if (callback) {
-                        callback(that, image);
-                    }
-                };
-                image.src = this.url;
-            }
-
-        }
-    }
-    class Texture$1 {
-        constructor(url, width, height, type) {
-            this.url = url;
-            /**@type {WebGLTexture} */
-            this.glTexture = null;
-            this.state = LoadState$1.init;
-            this.cubeMapHint = null;
-            this.width = width;
-            this.height = height;
-            this.elType = TextureElemType$1.default;
-            this.format = TextureFormat.default;
-            this.hasMipMap = true;
-            this.wrap_mode = TextureWrap$1.default;
-            if (MathUtil.isNone(type)) {
-                this.type = "TEXTURE_2D";
-            } else {
-                this.type = type;
-            }
-            if (MathUtil.isNone(width)) {
-                this.width = 1;
-            }
-            if (MathUtil.isNone(height)) {
-                this.height = 1;
-            }
-            this.id = Texture$1.createId();
-            console.log("constructor:texture >>>id=", this.id, "url=", this.url);
-            this.onLoadedCalls = [];
-            this.mipCount = -1;
-        }
-        getId() {
-            return this.id;
-        }
-        getMipCount() {
-            if (this.width === 1 && this.height === 1) {
-                console.error("Texture: not initialized ,url=", this.url);
-                return -1;
-            }
-
-            if (this.mipCount === -1) {
-                var minw = this.width < this.height ? this.width : this.height;
-                this.mipCount = Math.log(minw) * Math.LOG2E;
-            }
-            return this.mipCount;
-        }
-        static createId() {
-            Texture$1.id = Texture$1.id + 1;
-            return Texture$1.id;
-        }
-        onLoaded() {
-            for (var i in this.onLoadedCalls) {
-                this.onLoadedCalls[i](this);
-            }
-        }
-
-        bindDefaultColor(/**@type {WebGLRenderingContext} */gl, r, g, b, a) {
-            if (this.type !== "TEXTURE_2D") {
-                return;
-            }
-            if (this.glTexture === null) {
-                this.glTexture = gl.createTexture();
-            }
-            var defaultPxs = new Uint8Array([r * 255, g * 255, b * 255, a * 255]);
-            Texture$1.uploadTextureData(gl, this, defaultPxs, false, false, 1, 1);
-        }
-        static uploadTextureData(/**@type {WebGLRenderingContext} */gl,
-            /**@type {Texture} */
-            tex, data, isFlip, hasMipMap, fixw, fixh) {
-
-            var level = 0;
-            var format = gl.RGBA;
-            if (!MathUtil.isNone(tex.format)) {
-                format = gl[tex.format];
-            }
-            var internalFormat = format;
-            var width = tex.width;
-            var height = tex.height;
-            if (!MathUtil.isNone(fixw)) {
-                width = fixw;
-            }
-            if (!MathUtil.isNone(fixh)) {
-                height = fixh;
-            }
-            var eltype = gl[tex.elType];
-            var type = gl[tex.type];
-            // if(tex.elType === TextureElemType.float){
-            //     internalFormat = gl.RGB16F;
-            // }
-
-            console.log("upload Tex,", tex.elType);
-            gl.bindTexture(type, tex.glTexture);
-            //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !isFlip);
-            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
-            if (tex.elType === TextureElemType$1.float) {
-                var ext = gl.getExtension('OES_texture_float');
-                console.log("support >> OES_texture_float", ext);
-                var ext2 = gl.getExtension('OES_texture_float_linear');
-                console.log("support >> OES_texture_float_linear", ext2);
-                tex.wrap_mode = TextureWrap$1.default;
-            }
-            //console.log("should flip",isFlip);
-            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
-            if (type === gl.TEXTURE_CUBE_MAP) {
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                for (var j = 0; j < 6; j++) {
-                    // var ke = "TEXTURE_CUBE_MAP_"+tex.cubeMapHint[j];
-                    //  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,isFlip);
-                    if (data === null) {
-                        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, width, height, 0, format, eltype, null);
-                    } else {
-                        if (data[j] instanceof Image) {
-                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, format, eltype, data[j]);
-                        } else {
-                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, level, internalFormat, width, height, 0, format, eltype, data[j]);
-                        }
-                    }
-
-
-                }
-            } else if (data instanceof Image) {
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, isFlip);
-                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, eltype, data);
-            } else {
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, isFlip);
-                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, 0, format, eltype, data);
-            }
-            gl.texParameteri(type, gl.TEXTURE_WRAP_S, gl[tex.wrap_mode]);
-            gl.texParameteri(type, gl.TEXTURE_WRAP_T, gl[tex.wrap_mode]);
-
-
-            gl.LINEAR;
-            var hasET = true;
-            if (tex.elType === TextureElemType$1.float) {
-                var et1 = gl.getExtension('OES_texture_float');
-                var et2 = gl.getExtension('OES_texture_float_linear');
-                if (et1 === undefined || et2 === undefined) {
-                    hasET = false;
-                    alert("not supported");
-                }
-            }
-            //gl.getExtension('EXT_shader_texture_lod');
-            //gl.getExtension('OES_standard_derivatives');
-            // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,filter);
-            //gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,filter);
-            var isP2 = MathUtil.isPowerOf2(tex.width) && MathUtil.isPowerOf2(tex.height);
-            if (hasMipMap && tex.hasMipMap) {
-                if (isP2) {
-                    // gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.NEAREST_MIPMAP_LINEAR);
-                    //gl.texParameteri(type,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
-                    if (tex.elType === TextureElemType$1.float) {
-                        if (hasET) {
-                            // gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                            //console.log("errorstate1",gl.getError());
-                            gl.generateMipmap(type);
-
-                            if (MDBrowser === "Chrome") { //todo
-                                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-                                console.log("Texture>>>>chrome>> use mipmap filter", tex.id);
-                            } else {
-                                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                                // gl.texParameteri(type,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-                                // console.log("Texture>>>>not chrome >> liner",tex.id);
-                            }
-
-
-                        }
-                    } else {
-                        gl.generateMipmap(type);
-                        gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-                        console.log("Texture>>>>>not chrome >> 3333", tex.id);
-
-                    }
-
-
-                }
-            }
-            if (!isP2) {
-                gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            }
-            gl.bindTexture(type, null);
-
-        }
-
-        static loadCubeTexture(/**@type {WebGLRenderingContext} */gl,
-            /**@type {Texture} */
-            tex, loadCallback) {
-            if (tex.glTexture === null) {
-                tex.glTexture = gl.createTexture();
-            }
-            tex.state = LoadState$1.loading;
-            var loaded = 0;
-            var imgs = {};
-            for (var i = 0; i < 6; i++) {
-                var ui = tex.url[i];
-                var imgL = new ImgLoader(ui);
-                imgL.index = i;
-                imgL.load(function (loader, data) {
-                    loaded += 1;
-                    imgs[loader.index] = data;
-                    if (loaded === 6) {
-                        tex.width = loader.width; tex.height = loader.height;
-                        tex.format = loader.format;
-                        tex.elType = loader.elType;
-                        Texture$1.uploadTextureData(gl, tex, imgs, true, true);
-                        tex.state = LoadState$1.loaded;
-                        loadCallback(tex);
-
-                    }
-
-                });
-
-            }
-
-        }
-
-        static loadNullTexture(/**@type {WebGLRenderingContext} */gl,
-            /**@type {Texture} */
-            tex, loadCallback) {
-            if (tex.glTexture === null) {
-                tex.glTexture = gl.createTexture();
-            }
-            tex.state = LoadState$1.loading;
-            // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-            Texture$1.uploadTextureData(gl, tex, null, false, true);
-            // tex.loadCallback = loadCallback;
-        }
-
-        loadTexture(/**@type {WebGLRenderingContext} */gl,
-            loadCallback) {
-            var tex = this;
-            if (tex.url === TextureUrl.camera || MathUtil.isNone(tex.url)) {
-                Texture$1.loadNullTexture(gl, tex, loadCallback);
-
-                return;
-            }
-            if (tex.url instanceof (Array)) {
-                Texture$1.loadCubeTexture(gl, tex, loadCallback);
-                return;
-            }
-            if (tex.glTexture === null) {
-                tex.glTexture = gl.createTexture();
-            }
-            tex.state = LoadState$1.loading;
-            var that = this;
-
-            var imgL = new ImgLoader(tex.url);
-            imgL.load(function (loader, img) {
-                that.width = loader.width; that.height = loader.height;
-                that.format = loader.format; that.type = loader.type;
-                that.elType = loader.elType;
-                Texture$1.uploadTextureData(gl, that, img, true, true);
-                that.state = LoadState$1.loaded;
-                loadCallback(tex);
-
-
-            });
-
-        }
-    }
-    Texture$1.id = 0;
-
-    /*
-     * @Author: Sophie
-     * @email: bajie615@126.com
      * @Date: 2020-01-31 21:00:46
      * @Description: file content
      */
@@ -3439,11 +3605,18 @@ void calLight(inout vec3 lcolor, inout vec3 spec, vec3 eyeDir, vec3 direction, v
 `;
 
 
-    const func_calLight_blinn = `
+    // const func_calLight_phong=`
+    // void calLight(inout vec3 lcolor, inout vec3 spec,vec3 eyeDir, vec3 direction,vec3 normal, Light lt){
+    //     lcolor  =lcolor + lt.diffuse*max(dot(normal,-1.0*direction),0.0);
+    //     vec3 refDir = reflect(direction,normal);
+    //     spec = spec + pow(max(dot(eyeDir,refDir),0.0),lt.shininess)*lt.specular;
+    // }`;
+    const func_calLight_blinn=`
 void calLight(inout vec3 lcolor, inout vec3 spec,vec3 eyeDir, vec3 direction,vec3 normal, Light lt){
     lcolor  =lcolor + lt.diffuse*max(dot(normal,-1.0*direction),0.0);
     vec3 refDir = reflect(direction,normal);
-    spec = spec + pow(max(dot(eyeDir,refDir),0.0),lt.shininess)*lt.specular;
+    vec3 h = normalize(-1.0*direction + eyeDir);
+    spec = spec + pow(max(dot(normal,h),0.0),lt.shininess)*lt.specular;
 }`;
 
 
@@ -3690,7 +3863,7 @@ vec3 ACESFilmicToneMapping( vec3 color ) {
 	color *= hdrExposure;
 	return saturate( ( color * ( 2.51 * color + 0.03 ) ) / ( color * ( 2.43 * color + 0.59 ) + 0.14 ) );
 }
-vec3 toneMapping( vec3 color ) { return LinearToneMapping( color ); }
+vec3 toneMapping( vec3 color ) { return ACESFilmicToneMapping( color ); }
 `;
     ////gl_FragColor.rgb = vec3(1.0)- exp(-1.0*hdrExposure*gl_FragColor.rgb);
 
@@ -4857,58 +5030,58 @@ vec3 N = normalize(skyPos.xyz);
                 //     tex0 = new Texture(url);
                 // }
                 var tex0 = MaterialUtil.createTextureFromOps(shaderOps.texture0);
-                mat.setUniform("texture0", UTypeEnumn$1.texture, tex0);
+                mat.setUniform("texture0", UTypeEnumn.texture, tex0);
                 mat.addTexture(tex0);
                 shaderOps.useUV = true;
 
             } else if (!MathUtil.isNone(shaderOps.matColor)) {
-                mat.setUniform("matColor", UTypeEnumn$1.Vec4, shaderOps.matColor);
+                mat.setUniform("matColor", UTypeEnumn.Vec4, shaderOps.matColor);
             }
             if (!MathUtil.isNone(shaderOps.calIBLSpec)) {
-                mat.setUniform("roughness", UTypeEnumn$1.float, shaderOps.roughness);
+                mat.setUniform("roughness", UTypeEnumn.float, shaderOps.roughness);
             }
             if (!MathUtil.isNone(shaderOps.calBrdf)) {
                 shaderOps.useUV = true;
             }
             if (!MathUtil.isNone(shaderOps.hdrExposure)) {
-                mat.setUniform("hdrExposure", UTypeEnumn$1.float, shaderOps.hdrExposure);
+                mat.setUniform("hdrExposure", UTypeEnumn.float, shaderOps.hdrExposure);
             }
             if (!MathUtil.isNone(shaderOps.normalMap)) {
                 //var urln = shaderOps.normalMap;
                 //var texn = new Texture(urln);
                 var texn = MaterialUtil.createTextureFromOps(shaderOps.normalMap);
                 // texn.wrap_mode = TextureWrap.repeat;
-                mat.setUniform("normalMap", UTypeEnumn$1.texture, texn);
+                mat.setUniform("normalMap", UTypeEnumn.texture, texn);
                 mat.addTexture(texn);
                 shaderOps.useUV = true;
 
             } else if (!MathUtil.isNone(shaderOps.modelNormalMap)) {
                 var urlmn = shaderOps.modelNormalMap;
                 var texmn = new Texture(urlmn);
-                mat.setUniform("modelNormalMap", UTypeEnumn$1.texture, texmn);
+                mat.setUniform("modelNormalMap", UTypeEnumn.texture, texmn);
                 mat.addTexture(texmn);
                 shaderOps.useUV = true;
             }
             if (!MathUtil.isNone(shaderOps.cubeMap) || !MathUtil.isNone(shaderOps.envMap)) {
                 var urlc = shaderOps.cubeMap || shaderOps.envMap;
                 var texc = MaterialUtil.createTextureFromOps(urlc, TextureType.cube);
-                mat.setUniform("cubeMap", UTypeEnumn$1.texture, texc);
+                mat.setUniform("cubeMap", UTypeEnumn.texture, texc);
                 //texc.hasMipMap = true;
                 mat.addTexture(texc);
             }
             if (!MathUtil.isNone(shaderOps.rectSphereMap)) {
                 var urectM = shaderOps.rectSphereMap;
                 var rectmp = MaterialUtil.createTextureFromOps(urectM);
-                mat.setUniform("rectSphereMap", UTypeEnumn$1.texture, rectmp);
+                mat.setUniform("rectSphereMap", UTypeEnumn.texture, rectmp);
                 mat.addTexture(rectmp);
                 shaderOps.useUV = true;
             }
 
             if (!MathUtil.isNone(shaderOps.reflective)) {
-                mat.setUniform("reflective", UTypeEnumn$1.float, shaderOps.reflective);
+                mat.setUniform("reflective", UTypeEnumn.float, shaderOps.reflective);
             }
             if (!MathUtil.isNone(shaderOps.refractParams)) {
-                mat.setUniform("refractParams", UTypeEnumn$1.Vec2, shaderOps.refractParams);
+                mat.setUniform("refractParams", UTypeEnumn.Vec2, shaderOps.refractParams);
             }
 
             if (!MathUtil.isNone(shaderOps.texture1)) {
@@ -4920,7 +5093,7 @@ vec3 N = normalize(skyPos.xyz);
                     tex1 = new Texture(url1);
                 }
                 shaderOps.useUV = true;
-                mat.setUniform("texture1", UTypeEnumn$1.texture, tex1);
+                mat.setUniform("texture1", UTypeEnumn.texture, tex1);
                 mat.addTexture(tex1);
             }
 
@@ -4932,7 +5105,7 @@ vec3 N = normalize(skyPos.xyz);
                     var urlt = shaderOps.texture_brighter;
                     tbr = new Texture(urlt);
                 }
-                mat.setUniform("texture_brighter", UTypeEnumn$1.texture, tbr);
+                mat.setUniform("texture_brighter", UTypeEnumn.texture, tbr);
                 mat.addTexture(tbr);
                 shaderOps.useUV = true;
             }
@@ -4966,8 +5139,8 @@ vec3 N = normalize(skyPos.xyz);
                     var fogExp = shaderOps.fogExp;
                     if (fogExp.density === undefined) fogExp.density = 0.09;
                     if (fogExp.fogColor === undefined) fogExp.fogColor = [1.0, 1.0, 1.0];
-                    mat.setUniform("density", UTypeEnumn$1.float, fogExp.density);
-                    mat.setUniform("fogColor", UTypeEnumn$1.Vec3, fogExp.fogColor);
+                    mat.setUniform("density", UTypeEnumn.float, fogExp.density);
+                    mat.setUniform("fogColor", UTypeEnumn.Vec3, fogExp.fogColor);
                 } else {
                     var start = 1.0;
                     var end = 20.0;
@@ -4977,8 +5150,8 @@ vec3 N = normalize(skyPos.xyz);
                         end = shaderOps.fogLinear.end;
                         fogColor = shaderOps.fogLinear.fogColor;
                     }
-                    mat.setUniform("fogLinear", UTypeEnumn$1.Vec2, [start, end]);
-                    mat.setUniform("fogColor", UTypeEnumn$1.Vec3, fogColor);
+                    mat.setUniform("fogLinear", UTypeEnumn.Vec2, [start, end]);
+                    mat.setUniform("fogColor", UTypeEnumn.Vec3, fogColor);
                 }
             }
             if (!MathUtil.isNone(shaderOps.aoMap)) {
@@ -4989,7 +5162,7 @@ vec3 N = normalize(skyPos.xyz);
                     var urltrao = shaderOps.aoMap;
                     trao = new Texture(urltrao);
                 }
-                mat.setUniform("aoMap", UTypeEnumn$1.texture, trao);
+                mat.setUniform("aoMap", UTypeEnumn.texture, trao);
                 mat.addTexture(trao);
                 shaderOps.useUV = true;
             }
@@ -5004,7 +5177,7 @@ vec3 N = normalize(skyPos.xyz);
                         var urlrh = shaderOps.roughMap;
                         trh = new Texture(urlrh);
                     }
-                    mat.setUniform("roughMap", UTypeEnumn$1.texture, trh);
+                    mat.setUniform("roughMap", UTypeEnumn.texture, trh);
                     mat.addTexture(trh);
                     shaderOps.useUV = true;
                 }
@@ -5012,7 +5185,7 @@ vec3 N = normalize(skyPos.xyz);
                 if (!MathUtil.isNone(shaderOps.roughness)) {
                     roughness = shaderOps.roughness;
                 }
-                mat.setUniform("roughness", UTypeEnumn$1.float, roughness);
+                mat.setUniform("roughness", UTypeEnumn.float, roughness);
 
                 if (!MathUtil.isNone(shaderOps.metalMap)) {
                     var tmt = null;
@@ -5022,7 +5195,7 @@ vec3 N = normalize(skyPos.xyz);
                         var urlmt = shaderOps.metalMap;
                         tmt = new Texture(urlmt);
                     }
-                    mat.setUniform("metalMap", UTypeEnumn$1.texture, tmt);
+                    mat.setUniform("metalMap", UTypeEnumn.texture, tmt);
                     mat.addTexture(tmt);
                     shaderOps.useUV = true;
                 }
@@ -5030,10 +5203,10 @@ vec3 N = normalize(skyPos.xyz);
                 if (!MathUtil.isNone(shaderOps.metalness)) {
                     metalness = shaderOps.metalness;
                 }
-                mat.setUniform("metalness", UTypeEnumn$1.float, metalness);
+                mat.setUniform("metalness", UTypeEnumn.float, metalness);
                 if (!MathUtil.isNone(shaderOps.irradianceMap)) {
                     var irdtex = MaterialUtil.createTextureFromOps(shaderOps.irradianceMap, TextureType.cube);
-                    mat.setUniform("irradianceMap", UTypeEnumn$1.texture, irdtex);
+                    mat.setUniform("irradianceMap", UTypeEnumn.texture, irdtex);
                     mat.addTexture(irdtex);
                     shaderOps.IBL = true;
                     fdefineStr += "#define DF_IRRADIANCEMAP\n";
@@ -5046,22 +5219,22 @@ vec3 N = normalize(skyPos.xyz);
                     if (rdtex.type === TextureType.default) {
                         fdefineStr += "#define DF_RADSPMAP\n";
                     }
-                    mat.setUniform("radianceMap", UTypeEnumn$1.texture, rdtex);
+                    mat.setUniform("radianceMap", UTypeEnumn.texture, rdtex);
                     mat.addTexture(rdtex);
 
                     if (rdtex.state === LoadState.loaded) {
                         var maxMipCount = rdtex.getMipCount();
-                        mat.setUniform("MAX_MIPCOUNT", UTypeEnumn$1.float, maxMipCount);
+                        mat.setUniform("MAX_MIPCOUNT", UTypeEnumn.float, maxMipCount);
                     } else {
                         rdtex.onLoadedCalls.push(function (tex) {
                             var maxMipCount = rdtex.getMipCount();
-                            mat.setUniform("MAX_MIPCOUNT", UTypeEnumn$1.float, maxMipCount);
+                            mat.setUniform("MAX_MIPCOUNT", UTypeEnumn.float, maxMipCount);
                         });
                     }
 
                     if (!MathUtil.isNone(shaderOps.lutMap)) {
                         var lutTex = MaterialUtil.createTextureFromOps(shaderOps.lutMap);
-                        mat.setUniform("lutMap", UTypeEnumn$1.texture, lutTex);
+                        mat.setUniform("lutMap", UTypeEnumn.texture, lutTex);
                         mat.addTexture(lutTex);
                         fdefineStr += "#define DF_LUTMAP\n";
                     }
@@ -5093,13 +5266,13 @@ vec3 N = normalize(skyPos.xyz);
                     hmt = new Texture(urhmt);
                 }
                 // hmt.wrap_mode = TextureWrap.repeat;
-                mat.setUniform("heightMap", UTypeEnumn$1.texture, hmt);
+                mat.setUniform("heightMap", UTypeEnumn.texture, hmt);
                 mat.addTexture(hmt);
                 shaderOps.useUV = true;
             }
 
             if (!MathUtil.isNone(shaderOps.uvTran)) {
-                mat.setUniform("uvTran", UTypeEnumn$1.Vec4, shaderOps.uvTran);
+                mat.setUniform("uvTran", UTypeEnumn.Vec4, shaderOps.uvTran);
             }
             var heads = MaterialUtil.createShaderHead(shaderOps);
             var bodys = MaterialUtil.createShaderBody(shaderOps);
@@ -5158,18 +5331,18 @@ vec3 N = normalize(skyPos.xyz);
 
                 dir = MathUtil.normalize(dir);
                 var lcolor = MathUtil.multiplyV3(lightDiff.color, mat.shaderOption.diffuse);
-                mat.setUniform(key + ".light.diffuse", UTypeEnumn$1.Vec3,
+                mat.setUniform(key + ".light.diffuse", UTypeEnumn.Vec3,
                     [lcolor.x, lcolor.y, lcolor.z]);
                 var dir4 = new Vector4(-1.0 * dir.x, -1.0 * dir.y, -1.0 * dir.z, 0.0);
                 dir4 = MathUtil.vec4MultiMatrix(dir4, viewM);
                 //console.log("lightDirection",dir4);
-                mat.setUniform(key + ".direction", UTypeEnumn$1.Vec3,
+                mat.setUniform(key + ".direction", UTypeEnumn.Vec3,
                     [dir4.x, dir4.y, dir4.z]);
                 if (!mat.shaderOption.PBR && !MathUtil.isNone(mat.shaderOption.specular) &&
                     !MathUtil.isNone(lightDiff.specular)) {
                     var specu = MathUtil.multiplyV3(lightDiff.specular, mat.shaderOption.specular);
-                    mat.setUniform(key + ".light.specular", UTypeEnumn$1.Vec3, [specu.x, specu.y, specu.z]);
-                    mat.setUniform(key + ".light.shininess", UTypeEnumn$1.float, mat.shaderOption.shininess);
+                    mat.setUniform(key + ".light.specular", UTypeEnumn.Vec3, [specu.x, specu.y, specu.z]);
+                    mat.setUniform(key + ".light.shininess", UTypeEnumn.float, mat.shaderOption.shininess);
                 }
             }
 
@@ -5183,17 +5356,17 @@ vec3 N = normalize(skyPos.xyz);
                 var dir = lightDiff.transform.pos;
                 var dir4 = new Vector4(dir.x, dir.y, dir.z, 1.0);
                 dir4 = MathUtil.vec4MultiMatrix(dir4, viewM);
-                mat.setUniform(key + ".position", UTypeEnumn$1.Vec3,
+                mat.setUniform(key + ".position", UTypeEnumn.Vec3,
                     [dir4.x, dir4.y, dir4.z]);
-                mat.setUniform(key + ".params", UTypeEnumn$1.Vec3, [lightDiff.constant, lightDiff.linear, lightDiff.quadratic]);
+                mat.setUniform(key + ".params", UTypeEnumn.Vec3, [lightDiff.constant, lightDiff.linear, lightDiff.quadratic]);
                 var lcolor = MathUtil.multiplyV3(lightDiff.color, mat.shaderOption.diffuse);
-                mat.setUniform(key + ".light.diffuse", UTypeEnumn$1.Vec3,
+                mat.setUniform(key + ".light.diffuse", UTypeEnumn.Vec3,
                     [lcolor.x, lcolor.y, lcolor.z]);
                 if (!mat.shaderOption.PBR && !MathUtil.isNone(mat.shaderOption.specular) &&
                     !MathUtil.isNone(lightDiff.specular)) {
                     var specu = MathUtil.multiplyV3(lightDiff.specular, mat.shaderOption.specular);
-                    mat.setUniform(key + ".light.specular", UTypeEnumn$1.Vec3, [specu.x, specu.y, specu.z]);
-                    mat.setUniform(key + ".light.shininess", UTypeEnumn$1.float, mat.shaderOption.shininess);
+                    mat.setUniform(key + ".light.specular", UTypeEnumn.Vec3, [specu.x, specu.y, specu.z]);
+                    mat.setUniform(key + ".light.shininess", UTypeEnumn.float, mat.shaderOption.shininess);
                 }
 
             }
@@ -5217,7 +5390,7 @@ vec3 N = normalize(skyPos.xyz);
                 var modelM = entityTransform.getDerivTranMatrix();
                 var mvp = MathUtil.multiplyMat(projM, MathUtil.multiplyMat(viewM, modelM));
                 var value = MathUtil.mat2Arr(mvp);
-                mat.setUniform(key, UTypeEnumn$1.Mat4, value);
+                mat.setUniform(key, UTypeEnumn.Mat4, value);
             }
         }
 
@@ -5262,13 +5435,13 @@ vec3 N = normalize(skyPos.xyz);
                 MaterialUtil.updateDirLightInfo(gl, viewM, scene.dirLights, mat);
                 MaterialUtil.updatePointLightInfo(gl, viewM, scene.pointLights, mat);
                 //console.log("dir==",dir);
-                mat.setUniform("ambientLight", UTypeEnumn$1.Vec3,
+                mat.setUniform("ambientLight", UTypeEnumn.Vec3,
                     [scene.ambientLight.x, scene.ambientLight.y, scene.ambientLight.z]);
 
                 var mInv = entityTrans.getDerivInvTranMatrix();
                 var vInv = camera.transform.getDerivTranMatrix();
                 var nM = MathUtil.getNormalMatrixArr(mInv, vInv);
-                mat.setUniform("normalMatrix", UTypeEnumn$1.Mat4, nM);
+                mat.setUniform("normalMatrix", UTypeEnumn.Mat4, nM);
 
             }
 
@@ -5283,7 +5456,7 @@ vec3 N = normalize(skyPos.xyz);
      * @Description: file content
      */
 
-    var FrameState = {
+    const FrameState = {
         BeforeDraw: 0,
         AfterDraw: 1
     };
@@ -5623,17 +5796,17 @@ vec3 N = normalize(skyPos.xyz);
                 var mvM = Transform.getMVGLArr(viewM, eM);
                 mat.setUniform(
                     DefaultUniformKey.projectionMatrix,
-                    UTypeEnumn$1.Mat4, projM);
+                    UTypeEnumn.Mat4, projM);
                 mat.setUniform(
                     DefaultUniformKey.modelViewMatrix,
-                    UTypeEnumn$1.Mat4, mvM);
+                    UTypeEnumn.Mat4, mvM);
                 if (mat.shaderOption.uniformsToUp.modelCameraPos) {
                     var eMI = entity.transform.getDerivInvTranMatrix();
                     var cPos = camera.transform.pos;
                     var mcpos = MathUtil.vec3MultiMat4(cPos, eMI);
                     mat.setUniform(
                         "modelCameraPos",
-                        UTypeEnumn$1.Vec3, [mcpos.x, mcpos.y, mcpos.z]);
+                        UTypeEnumn.Vec3, [mcpos.x, mcpos.y, mcpos.z]);
 
                 }
                 if (mat.shaderOption.uniformsToUp.modelViewInv) {
@@ -5642,13 +5815,13 @@ vec3 N = normalize(skyPos.xyz);
                     var mvI = MathUtil.mat2Arr(math.multiply(mI, viewI));
                     mat.setUniform(
                         "modelViewInv",
-                        UTypeEnumn$1.Mat4, mvI);
+                        UTypeEnumn.Mat4, mvI);
 
                 }
                 if (!MathUtil.isNone(mat.shaderOption.envMap) ||
                     mat.shaderOption.IBL) {
                     var viewArr = Transform.mat2Arr(viewM);
-                    mat.setUniform("viewMatrix", UTypeEnumn$1.Mat4, viewArr);
+                    mat.setUniform("viewMatrix", UTypeEnumn.Mat4, viewArr);
                 }
 
                 var vertexBuffer = entity.mesh.getVertexBufferInfo(gl);
@@ -6255,172 +6428,6 @@ vec3 N = normalize(skyPos.xyz);
     /*
      * @Author: Sophie
      * @email: bajie615@126.com
-     * @Date: 2020-02-08 18:43:05
-     * @Description: file content
-     */
-
-    class RenderTexture$1 extends Texture$1 {
-        constructor(url, width, height, type) {
-            super(url, width, height, type);
-            this.depthRBuffer = null;
-            this.hasColorBuffer = true;
-            this.frameBufferId = null;
-            this.assitColorBuffers = null;
-            this.currentFace = -1;
-            this.currentMip = 0;
-        }
-
-        loadTexture(/**@type {WebGLRenderingContext} */gl,
-            loadCallback) {
-
-            if (!this.hasColorBuffer) {
-                var ext = gl.getExtension("WEBGL_depth_texture");
-                console.log(ext);
-                super.format = "DEPTH_COMPONENT";
-                //rbf_format = gl.DEPTH_COMPONENT;
-                super.elType = "UNSIGNED_SHORT";
-                this.hasMipMap = false;
-            } else {
-                this.depthRBuffer = gl.createRenderbuffer();
-                gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthRBuffer);
-                gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, this.width, this.height);
-
-            }
-            //gl.bindRenderbuffer(gl.RENDERBUFFER,0);
-            this.frameBufferId = gl.createFramebuffer();
-            if (this.elType === TextureElemType.float) {
-                gl.getExtension('WEBGL_color_buffer_float');
-            }
-            this.wrap_mode = TextureWrap.default;
-            super.loadTexture(gl, loadCallback);
-            this.loadAssitColorBuffers(gl);
-
-        }
-
-        loadAssitColorBuffers(/**@type {WebGLRenderingContext} */gl) {
-            if (this.assitColorBuffers !== null) {
-                for (var i = 0; i < this.assitColorBuffers.length; i++) {
-                    this.assitColorBuffers[i].loadTexture(gl, null);
-                }
-            }
-        }
-        uploadColorBuffers(/**@type {WebGLRenderingContext} */gl) {
-            var texTarget = gl.TEXTURE_2D;
-            if (this.type === TextureType.cube) {
-                texTarget = gl.TEXTURE_CUBE_MAP_POSITIVE_X + this.currentFace;
-            }
-
-            if (this.assitColorBuffers !== null) {
-                var ext = gl.getExtension("WEBGL_draw_buffers");
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, ext.COLOR_ATTACHMENT0_WEBGL, texTarget,
-                    this.glTexture, this.currentMip);
-                var color_attatchs = [ext.COLOR_ATTACHMENT0_WEBGL];
-                for (var i = 0; i < this.assitColorBuffers.length; i++) {
-                    var ctex = this.assitColorBuffers[i];
-                    var t = i + 1;
-                    var colorKey = ext["COLOR_ATTACHMENT" + t + "_WEBGL"];
-                    color_attatchs.push(colorKey);
-                    gl.framebufferTexture2D(gl.FRAMEBUFFER, colorKey, texTarget,
-                        ctex.glTexture, this.currentMip);
-                    this.onFrameLoaded(ctex);
-                }
-                ext.drawBuffersWEBGL(color_attatchs);
-            } else {
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, texTarget,
-                    this.glTexture, this.currentMip);
-
-            }
-        }
-
-        generateMipMap(/**@type {WebGLRenderingContext} */gl) {
-            if (this.hasMipMap) {
-                var type = gl[this.type];
-                gl.bindTexture(type, this.glTexture);
-                gl.generateMipmap(type);
-                gl.bindTexture(type, null);
-                console.log("produce mipmap");
-            }
-        }
-        onFrameLoaded(tex) {
-            if (tex.state === LoadState.loading) {
-                if (tex.type === TextureType.cube) {
-                    if (tex.currentFace === 5) {
-                        tex.state = LoadState.loaded;
-                        TextureManager.getManager().onTexLoaded(tex);
-                    }
-
-                } else {
-                    tex.state = LoadState.loaded;
-                    TextureManager.getManager().onTexLoaded(tex);
-                }
-
-            }
-        }
-
-        calRotateFace(/**@type {Camera} */ cam) {
-            if (this.currentFace === 5) {
-                this.currentFace = -1;
-            }
-            this.currentFace += 1;
-            var rot = new Vector3(0, 0, 0);
-            cam.transform.resetRotate(0, 0, 0);
-            //default look at negZ
-            switch (this.currentFace) {
-                case 0: //pox
-                    rot.y = 90.0;
-                    rot.x = 180.0;
-                    break;
-                case 1: //nex
-                    //rot.y = 180.0;
-                    rot.y = -90;
-                    rot.x = 180.0;
-                    break;
-                case 2: //poy
-                    //rot.y = 90.0;
-                    //rot.x = 90;
-                    //rot.y = 180;
-                    rot.x = 90;
-                    break;
-                case 3: //negy
-                    //rot.x = -180.0;
-                    //rot.y = 180;
-                    rot.x = -90;
-                    break;
-                case 4:// posz
-                    //rot.x = 90;
-                    //rot.y = 180;
-                    rot.z = 180;
-                    rot.y = -180.0;
-                    break;
-                case 5:
-                    rot.z = 180;
-                    break;
-            }
-            cam.transform.rotate(rot.x, rot.y, rot.z);
-            // cam.transform.rotate(180,-90,0.0);
-        }
-
-        updateFBODate(/**@type {WebGLRenderingContext} */gl, cam) {
-            if (this.type === TextureType.cube) {
-                this.calRotateFace(cam);
-            }
-            if (this.hasColorBuffer) {
-                this.uploadColorBuffers(gl);
-                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT,
-                    gl.RENDERBUFFER, this.depthRBuffer);
-                gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-            } else {
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D,
-                    this.glTexture, 0);
-            }
-            this.onFrameLoaded(this);
-
-        }
-    }
-
-    /*
-     * @Author: Sophie
-     * @email: bajie615@126.com
      * @Date: 2020-02-18 17:17:07
      * @Description: file content
      */
@@ -6442,43 +6449,52 @@ vec3 N = normalize(skyPos.xyz);
     exports.DefaultUniformKey = DefaultUniformKey;
     exports.DirectionLight = DirectionLight;
     exports.Entity = Entity;
-    exports.GridMesh = GridMesh$1;
+    exports.FrameState = FrameState;
+    exports.GridMesh = GridMesh;
     exports.IAsset = IAsset;
     exports.IBLUtil = IBLUtil;
     exports.ImgLoader = ImgLoader;
     exports.InteractUtil = InteractUtil;
+    exports.Layout = Layout;
     exports.Light = Light;
     exports.LightUtil = LightUtil;
+    exports.LoadState = LoadState;
+    exports.MDBrowser = MDBrowser;
     exports.MacroAsset = MacroAsset$1;
     exports.Material = Material;
     exports.MaterialAni = MaterialAni;
     exports.MaterialUtil = MaterialUtil;
     exports.MathUtil = MathUtil;
-    exports.Mesh = Mesh$1;
+    exports.Mesh = Mesh;
     exports.MeshUtil = MeshUtil;
     exports.Pass = Pass;
     exports.PassLayer = PassLayer;
     exports.PointLight = PointLight;
-    exports.PrimitiveType = PrimitiveType$1;
+    exports.PrimitiveType = PrimitiveType;
     exports.Program = Program;
     exports.ProgramInfo = ProgramInfo;
     exports.Render = Render;
     exports.RenderInfo = RenderInfo;
     exports.RenderLayer = RenderLayer;
     exports.RenderMask = RenderMask;
-    exports.RenderTexture = RenderTexture$1;
+    exports.RenderTexture = RenderTexture;
     exports.RotationOrder = RotationOrder;
     exports.Scene = Scene;
     exports.SceneUtil = SceneUtil;
     exports.ShaderLayer = ShaderLayer;
     exports.ShaderOption = ShaderOption;
     exports.SubPass = SubPass;
-    exports.Texture = Texture$1;
+    exports.Texture = Texture;
     exports.TextureBlend = TextureBlend;
-    exports.TextureManager = TextureManager$1;
+    exports.TextureElemType = TextureElemType;
+    exports.TextureFormat = TextureFormat;
+    exports.TextureManager = TextureManager;
+    exports.TextureType = TextureType;
+    exports.TextureUrl = TextureUrl;
+    exports.TextureWrap = TextureWrap;
     exports.Transform = Transform;
     exports.TransformAni = TransformAni;
-    exports.UTypeEnumn = UTypeEnumn$1;
+    exports.UTypeEnumn = UTypeEnumn;
     exports.ValueAni = ValueAni;
     exports.Vector3 = Vector3;
     exports.Vector4 = Vector4;
@@ -6488,4 +6504,4 @@ vec3 N = normalize(skyPos.xyz);
 
     return exports;
 
-}({}));
+})({});

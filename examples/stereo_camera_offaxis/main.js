@@ -7,14 +7,14 @@
 
 function initCamera(asp,w,h,layers){
    console.log("camera,asp:",asp);
-   var cam = new Camera();
+   var cam = new Mad3D.Camera();
    cam.setFov(45);
    cam.setFar(100.0);
    cam.setNear(5);
    cam.setAsp(asp);
-   var rt = new RenderTexture("Camera",w,h);
+   var rt = new Mad3D.RenderTexture("Camera",w,h);
    cam.renderTarget = rt;
-   cam.renderMask =RenderMask.layers;
+   cam.renderMask =Mad3D.RenderMask.layers;
    for (var i in layers){
       cam.addRenderLayer(layers[i]);
    }
@@ -25,7 +25,7 @@ class StereoCamera{
    constructor(asp,w,h,layers) {
       this.rightCam = initCamera(asp,w,h,layers);
       this.leftCam = initCamera(asp,w,h,layers);
-      this.transform =  new Transform();
+      this.transform =  new Mad3D.Transform();
       this.rightCam.transform.setParent(this.transform);
       this.leftCam.transform.setParent(this.transform);
       this.rightCam.name = "rightCam";
@@ -77,11 +77,11 @@ class StereoCamera{
       var h = n*Math.tan(fov/2.0);
       var a = h*this.asp;
       console.log("a =, h=",a,h);
-      var pa = new Vector3(-a,-h,0); 
-      var pb = new Vector3(a,-h,0);
-      var pc = new Vector3(-a,h,0);
-      var pel = new Vector3(eyePos.x-this.bks,eyePos.y,eyePos.z);
-      var per = new Vector3(eyePos.x+this.bks,eyePos.y,eyePos.z);
+      var pa = new Mad3D.Vector3(-a,-h,0); 
+      var pb = new Mad3D.Vector3(a,-h,0);
+      var pc = new Mad3D.Vector3(-a,h,0);
+      var pel = new Mad3D.Vector3(eyePos.x-this.bks,eyePos.y,eyePos.z);
+      var per = new Mad3D.Vector3(eyePos.x+this.bks,eyePos.y,eyePos.z);
       var frustuml = this._innerCalFrustum(pa,pb,pc,pel,n);
       var frustumr = this._innerCalFrustum(pa,pb,pc,per,n);
       this.leftCam.setFrustrum(frustuml.l,frustuml.r,frustuml.t,frustuml.b);
@@ -104,8 +104,8 @@ function createProjectPlaneEnties(layer,ds,steroCam){
    //blackwhite.jpeg
    var baseUrl = "../pics/blackwhite.jpeg";//test3.jpg"; 
    var dep = 30;
-   var smesh2 = MeshUtil.createBox(2*a,2*h,dep);
-   var enti =SceneUtil.createEntity(ds.scene,"box",
+   var smesh2 = Mad3D.MeshUtil.createBox(2*a,2*h,dep);
+   var enti =Mad3D.SceneUtil.createEntity(ds.scene,"box",
       {mesh:smesh2,receiveLight:true,receiveShadow:false,texture0:baseUrl,
            matColor:[0.2,0.6,0.2,1.0],cullFace :"FRONT"});
            enti.setRenderLayer(layer);
@@ -113,11 +113,11 @@ function createProjectPlaneEnties(layer,ds,steroCam){
            enti.transform.setPosition(0,0,0);
 
 
-   var smesh = MeshUtil.createBox(0.3,0.3,0.3);
+   var smesh = Mad3D.MeshUtil.createBox(0.3,0.3,0.3);
 
    var res = [];
    for(var i = 0; i<3; i++){
-      var enti1 =SceneUtil.createEntity(ds.scene,"box",
+      var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
       {mesh:smesh,receiveLight:false,receiveShadow:false,
            matColor:[0.2,0.6,0.2,1.0]});
            enti1.setRenderLayer(layer);
@@ -130,22 +130,22 @@ function createProjectPlaneEnties(layer,ds,steroCam){
 function createBuildBox(layer,ds){
    var dep = 10;
   
-   var smesh = MeshUtil.createBox(1,1,1);
+   var smesh = Mad3D.MeshUtil.createBox(1,1,1);
 
 
-   var enti3 =SceneUtil.createEntity(ds.scene,"box",
+   var enti3 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
    {mesh:smesh,receiveLight:true,receiveShadow:false,
         matColor:[0.2,0.6,0.2,1.0]});
         enti3.setRenderLayer(layer);
         enti3.transform.setPosition(0,0,2);
         ds.scene.addEntity(enti3);
-   var enti1 =SceneUtil.createEntity(ds.scene,"box",
+   var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
    {mesh:smesh,receiveLight:true,receiveShadow:false,
         matColor:[0.2,0.6,0.2,1.0]});
         enti1.setRenderLayer(layer);
         ds.scene.addEntity(enti1);
         enti1.transform.setPosition(1,0,-5);
-        var enti2 =SceneUtil.createEntity(ds.scene,"box",
+        var enti2 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
         {mesh:smesh,receiveLight:true,receiveShadow:false,
              matColor:[0.2,0.6,0.2,1.0]});
              enti2.setRenderLayer(layer);
@@ -162,18 +162,18 @@ function createBuildBox(layer,ds){
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
    
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.scene.ambientLight = new Vector3(0.2,0.2,0.2);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.2,0.2,0.2);
    //  //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(1.0,1.0,1.0);
-    lt.specular = new Vector3(1.5,1.5,1.5);
-    var contentLayer = RenderLayer.default+1;
-    var viewLayer = RenderLayer.default+2;
+    lt.color = new Mad3D.Vector3(1.0,1.0,1.0);
+    lt.specular = new Mad3D.Vector3(1.5,1.5,1.5);
+    var contentLayer = Mad3D.RenderLayer.default+1;
+    var viewLayer = Mad3D.RenderLayer.default+2;
 
-   ds.camera.renderMask = RenderMask.layers;
+   ds.camera.renderMask = Mad3D.RenderMask.layers;
     ds.camera.addRenderLayer(viewLayer);
     //ds.camera.addRenderLayer(contentLayer);
     var w = ds.scene.gl.canvas.width;
@@ -191,8 +191,8 @@ function initScene(){
     
     
          // var baseUrl = "../pics/MD3d_hello.png";  
-      var pR = MeshUtil.createPlane(5,5*h/w,0.0);
-      var viewL = SceneUtil.createEntity(ds.scene,"viewL",
+      var pR = Mad3D.MeshUtil.createPlane(5,5*h/w,0.0);
+      var viewL = Mad3D.SceneUtil.createEntity(ds.scene,"viewL",
       {mesh:pR,receiveLight:false,receiveShadow:false,
          matColor:[0.2,0.8,0.1,1.0],texture0:steroCam.leftCam.renderTarget
          });
@@ -201,7 +201,7 @@ function initScene(){
 
       ds.scene.addEntity(viewL);
 
-      var viewR = SceneUtil.createEntity(ds.scene,"viewR",
+      var viewR = Mad3D.SceneUtil.createEntity(ds.scene,"viewR",
       {mesh:pR,receiveLight:false,receiveShadow:false,
          matColor:[0.2,0.2,0.8,1.0],texture0:ds.steroCam.rightCam.renderTarget
          });
@@ -215,7 +215,7 @@ function initScene(){
          gl_FragColor = color_tex1;
       }
       `;
-      var merge = SceneUtil.createEntity(ds.scene,"viewMerge",
+      var merge = Mad3D.SceneUtil.createEntity(ds.scene,"viewMerge",
       {mesh:pR,receiveLight:false,receiveShadow:false,
          matColor:[0.2,0.0,0.0,1.0],texture0:steroCam.leftCam.renderTarget,
          texture1:steroCam.rightCam.renderTarget,fbody_add:fbody_add
@@ -232,10 +232,10 @@ function initScene(){
       //steroCam.moveEyes({x:1,y:0.0,z:8});
    
     //interaction
-    var transform = new Transform();
+    var transform = new Mad3D.Transform();
     var pa = {transform: transform};
 
-   InteractUtil.registerMovehandler(ds.scene.gl.canvas,transform,[360,45],function(tf){
+   Mad3D.InteractUtil.registerMovehandler(ds.scene.gl.canvas,transform,[360,45],function(tf){
       steroCam.moveProjectCam(tf.rot.y*0.1,tf.rot.x*0.1,cpos.z,ds.projentis);
    });
 

@@ -6,7 +6,7 @@
  */
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -25,21 +25,21 @@ function createLights(scene,lp,shadowCamera,isPoint){
 
     //pointLight
     if(isPoint){
-        dlt = new PointLight();
+        dlt = new Mad3D.PointLight();
         dlt.transform.setPosition(lp.x,lp.y,lp.z);
         dlt.constant = 0.95;
         dlt.linear = 0.07;
         dlt.quadratic = 0.001;
         
     }else{
-        dlt = new DirectionLight();
+        dlt = new Mad3D.DirectionLight();
         dlt.transform.setPosition(-1.0*lp.x,-1.0*lp.y,-1.0*lp.z);
     }
     
    // scene.dirLights.push(dlt);
     scene.addLight(dlt);
-    scene.ambientLight = new Vector3(0.3,0.3,0.3);
-    if(shadowCamera instanceof Camera){
+    scene.ambientLight = new Mad3D.Vector3(0.3,0.3,0.3);
+    if(shadowCamera instanceof Mad3D.Camera){
         dlt.castShadow = true;
         dlt.shadowCam = shadowCamera;
         var w = shadowCamera.renderTarget.width;
@@ -51,17 +51,17 @@ function createLights(scene,lp,shadowCamera,isPoint){
 
 }
 function createDepthMaterial(scene){
-    var shaderOps = new ShaderOption();
+    var shaderOps = new Mad3D.ShaderOption();
     shaderOps.matColor = [1.0,1.0,1.0,1.0];
-    return MaterialUtil.createFromShaderOption(shaderOps,scene);
+    return Mad3D.MaterialUtil.createFromShaderOption(shaderOps,scene);
 }
 
 function createEntity(scene,mesh,color,isL,receiveShadow,tex){
     //var mesh = MeshUtil.createPlane(2,2,0);
     if(mesh === undefined){
-        mesh = MeshUtil.createSphere(1,100,100);
+        mesh = Mad3D.MeshUtil.createSphere(1,100,100);
     }
-    var shaderOps = new ShaderOption();
+    var shaderOps = new Mad3D.ShaderOption();
      var r= Math.random();
      shaderOps.matColor = [0.3,0.5,1.0,1.0];
      if(color !== undefined && color instanceof Array){
@@ -77,14 +77,14 @@ function createEntity(scene,mesh,color,isL,receiveShadow,tex){
     if(isL ===false){
 
     }else{
-        shaderOps.diffuse = new Vector3(1.0,1.0,1.0);
-       shaderOps.specular = new Vector3(2.0,2.0,2.0);
+        shaderOps.diffuse = new Mad3D.Vector3(1.0,1.0,1.0);
+       shaderOps.specular = new Mad3D.Vector3(2.0,2.0,2.0);
       shaderOps.shininess = 5.0;
       var dirCount = 0; var pointCount = 0;
-      if(!MathUtil.isNone(scene.dirLights)){
+      if(!Mad3D.MathUtil.isNone(scene.dirLights)){
         dirCount = scene.dirLights.length;
       }
-      if(!MathUtil.isNone(scene.pointLights)){
+      if(!Mad3D.MathUtil.isNone(scene.pointLights)){
         pointCount = scene.pointLights.length;
       }
       shaderOps.dirLightCount = dirCount;
@@ -93,9 +93,9 @@ function createEntity(scene,mesh,color,isL,receiveShadow,tex){
  
     }
      /**@type {Material} */
-     var material = MaterialUtil.createFromShaderOption(shaderOps,scene);
+     var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps,scene);
      
-     var entity = new Entity("t2");
+     var entity = new Mad3D.Entity("t2");
      entity.mesh = mesh;
      entity.material = material;
      if(receiveShadow){
@@ -103,7 +103,7 @@ function createEntity(scene,mesh,color,isL,receiveShadow,tex){
         // entity.depthMaterial.name = "depthMaterial";
         var depthMat = createDepthMaterial(scene);
         depthMat.name = "depthMaterial";
-        entity.material.addPassLayer(depthMat,CameraType.depth);
+        entity.material.addPassLayer(depthMat,Mad3D.CameraType.depth);
      }
      entity.transform.setPosition(1.5,0,0);
      //entity.transform.scale(1.0,1.0,0.5);
@@ -113,8 +113,8 @@ function createEntity(scene,mesh,color,isL,receiveShadow,tex){
  }
 
 function createDepthEntity(scene,tex,ratio){
-    var mesh = MeshUtil.createPlane(2*ratio,2,0);
-    var shaderOps = new ShaderOption();
+    var mesh = Mad3D.MeshUtil.createPlane(2*ratio,2,0);
+    var shaderOps = new Mad3D.ShaderOption();
     shaderOps.matColor = [0.0,1.0,1.0,1.0];
     //shaderOps.texture0 = "../pics/memorial.hdr";
     shaderOps.texture0 =tex;//"../pics/earthmap1k.jpg";
@@ -126,12 +126,12 @@ function createDepthEntity(scene,tex,ratio){
        gl_FragColor = vec4(grey, grey, grey, 1.0);
     `;
     /**@type {Material} */
-    var material = MaterialUtil.createFromShaderOption(shaderOps,scene);
-    var entity = new Entity("t1");
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps,scene);
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     entity.transform.setPosition(-1.5,0.5,0);
-    var cgLayer = RenderLayer.default+1;
+    var cgLayer = Mad3D.RenderLayer.default+1;
     entity.setRenderLayer(cgLayer);
     return entity;
 }
@@ -139,7 +139,7 @@ function createDepthEntity(scene,tex,ratio){
 function initScene(){
     //step1 init canvas
     /**@type {WebGLRenderingContext} */
-    var gl = CanvasUtil.initCanvas("sipc");
+    var gl = Mad3D.CanvasUtil.initCanvas("sipc");
     gl.canvas.width = gl.canvas.clientWidth*2.0;
     gl.canvas.height = gl.canvas.clientHeight*2.0;
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
@@ -149,17 +149,17 @@ function initScene(){
     console.log(asp);
 
     //step2 create scene
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     scene.gl = gl;
     scene.clearColor = [0.5,0.5,0.5,1.0];
 
     //step3 create main_camera
-    var cam = CameraUtil.createDefaultCamera(asp);
+    var cam = Mad3D.CameraUtil.createDefaultCamera(asp);
     scene.addCamera(cam);
 
-    var lightPos = new Vector3(0,10,0);
+    var lightPos = new Mad3D.Vector3(0,10,0);
     //step4 create shadow Camera
-    var sh_cam = CameraUtil.createShadowCamera(w,h,false,lightPos);
+    var sh_cam = Mad3D.CameraUtil.createShadowCamera(w,h,false,lightPos);
      sh_cam.setFov(55);
      sh_cam.setFar(100);
      sh_cam.setNear(0.1);
@@ -168,7 +168,7 @@ function initScene(){
 
     //step5 create Lights
     createLights(scene,lightPos,sh_cam,true);
-    var skb = SceneUtil.createSkyBox(scene);
+    var skb = Mad3D.SceneUtil.createSkyBox(scene);
     scene.addEntity(skb);
    // step6 create entity1: depth_plane
     var ent1 = createDepthEntity(scene,sh_cam.renderTarget,asp);
@@ -181,14 +181,14 @@ function initScene(){
     scene.addEntity(ent2);
 
     //step8 create entity3: floor plane
-    var meshp = MeshUtil.createCircle(3,9); 
+    var meshp = Mad3D.MeshUtil.createCircle(3,9); 
     //var meshp = MeshUtil.createBox(5,0.2,5);
     var ent3 = createEntity(scene,meshp,[0.2,0.7,0.7,1.0],true,true);
     ent3.name = "floor"; 
     ent3.transform.setPosition(0,-2.2,0);
     scene.addEntity(ent3);
     
-    var meshp2 = MeshUtil.createDoughnuts(0.8,1.5,50,50);
+    var meshp2 = Mad3D.MeshUtil.createDoughnuts(0.8,1.5,50,50);
     var ent4 = createEntity(scene,meshp2,[0.2,0.7,0.7,1.0],true,true);
     ent4.name = "floor2"; 
     ent4.transform.setPosition(0,-0.5,0);
@@ -196,11 +196,11 @@ function initScene(){
     scene.addEntity(ent4);
 
     //step9 register main camera move handler
-    InteractUtil.registerCameraMove(cam,gl.canvas);
+    Mad3D.InteractUtil.registerCameraMove(cam,gl.canvas);
     
     //step10 add animation for entity2
     var tf = ent2.transform;
-    var m1 = TransformAni(scene,tf,{
+    var m1 = Mad3D.TransformAni(scene,tf,{
             targets: tf.pos,
             x: -5,
             duration: 10000,

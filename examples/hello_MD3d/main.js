@@ -9,7 +9,7 @@
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
    
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
    //  ds.scene.ambientLight = new Vector3(0.02,0.02,0.02);
@@ -20,8 +20,8 @@ function initScene(){
 
    var baseUrl = "../pics/MD3d_hello.png";      
    
-      var smesh = MeshUtil.createBox(3,3,3);
-      var enti1 =SceneUtil.createEntity(ds.scene,"box",
+      var smesh = Mad3D.MeshUtil.createBox(3,3,3);
+      var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"box",
       {mesh:smesh,receiveLight:false,receiveShadow:false,
          texture0:baseUrl
          });
@@ -30,7 +30,7 @@ function initScene(){
   
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
    });
 
    return ds.scene;

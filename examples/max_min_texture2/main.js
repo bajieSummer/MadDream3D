@@ -40,7 +40,7 @@ function responseToMouse(
 
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -156,18 +156,18 @@ var alphaStep = 1.0/(loop-1);
 
 
 //var mesh = MeshUtil.createColorPolygon(colors,indices,posArr);
-var mesh = MeshUtil.createColorPolygon(newColors,newIndices,newPosArr);
+var mesh = Mad3D.MeshUtil.createColorPolygon(newColors,newIndices,newPosArr);
   //var mesh = MeshUtil.createColorPlane(2,2,colors,0);
     /**@type {Material} */
-    var material = MaterialUtil.createFromShader(vsSource,fsSource);
+    var material = Mad3D.MaterialUtil.createFromShader(vsSource,fsSource);
     material.shaderOption.vertexColor = true;
-    material.setUniform("u_mouse",UTypeEnumn.Vec2,[0.0,1.0]);
+    material.setUniform("u_mouse",Mad3D.UTypeEnumn.Vec2,[0.0,1.0]);
     
     console.log("resolution",w,h);
-    material.setUniform("u_resolution",UTypeEnumn.Vec2,[w,h]);
+    material.setUniform("u_resolution",Mad3D.UTypeEnumn.Vec2,[w,h]);
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     //entity.transform.setPosition(0,0,6);
@@ -179,7 +179,7 @@ var mesh = MeshUtil.createColorPolygon(newColors,newIndices,newPosArr);
     var ets = [];
     ets.push(entity);
 
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     mdg.scene = scene;
     
     scene.addCamera(cam);

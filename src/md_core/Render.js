@@ -7,6 +7,8 @@
 import { UTypeEnumn } from "./Program";
 import { Vector3, Vector4 } from "./MathUtil";
 
+import { LoadState } from "./Texture";
+
 export const RenderMask = {
     everything: 0,
     layers: 1,

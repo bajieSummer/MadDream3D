@@ -22,34 +22,34 @@ function createCubeUrls(pf,et){
 }
 
 function createCubeCamera(w,h){
-   var rt = new RenderTexture("Camera",w,h,TextureType.cube);
-   var cam = CameraUtil.createDefaultCamera(w/h);
+   var rt = new Mad3D.RenderTexture("Camera",w,h,TextureType.cube);
+   var cam = Mad3D.CameraUtil.createDefaultCamera(w/h);
    var n = 10.0;
    cam.setFov(90);
    cam.setNear(n);
    cam.clearColor = [1.0,0.0,0.0,1.0];
    cam.transform.setPosition(0,0,0);
    cam.renderTarget = rt;
-   cam.renderMask = RenderMask.layers;
+   cam.renderMask = Mad3D.RenderMask.layers;
    cam.addRenderLayer(RenderLayer.default);
    return cam;
 }
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.scene.ambientLight = new Vector3(0.1,0.1,0.1);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.1,0.1,0.1);
     //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(2.0,2.0,2.0);
+    lt.color = new Mad3D.Vector3(2.0,2.0,2.0);
     //lt.color = new Vector3(5.0,5.0,5.0);
-    lt.specular = new Vector3(1.5,1.5,1.5);
+    lt.specular = new Mad3D.Vector3(1.5,1.5,1.5);
     var skyfolder = "../pics/cube/bridge/";
     var skyEnv = createCubeUrls(skyfolder,".jpg");
-   var skybox = SceneUtil.createSkyBox(ds.scene);
+   var skybox = Mad3D.SceneUtil.createSkyBox(ds.scene);
    ds.scene.addEntity(skybox); 
   
    // var cubeCam = createCubeCamera(w,h);
@@ -67,8 +67,8 @@ function initScene(){
    // matColor:[0.7,0.2,0.3,1.0]
   // var spMap = "../pics/sphericalMap/Brooklyn_Bridge.hdr";
    var spMap = "../pics/sphericalMap/room1.png";
-   var boxMesh = MeshUtil.createSphere(1,50,50);
-   var box2 = SceneUtil.createEntity(ds.scene,"box",{
+   var boxMesh = Mad3D.MeshUtil.createSphere(1,50,50);
+   var box2 = Mad3D.SceneUtil.createEntity(ds.scene,"box",{
      rectSphereMap:spMap,mesh:boxMesh,receiveLight:false
    });
   // box2.transform.setPosition(-3,0,-3);
@@ -87,12 +87,12 @@ function initScene(){
   
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     
 var tf = box2.transform;
-var m1 = TransformAni(ds.scene,tf,{
+var m1 = Mad3D.TransformAni(ds.scene,tf,{
         targets: tf.pos,
         z: -10,
         duration: 5000,

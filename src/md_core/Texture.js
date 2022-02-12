@@ -5,35 +5,35 @@
  * @Description: file content
  */
 
-import { MathUtil } from "./MathUtil";
+import { MathUtil, MDBrowser } from "./MathUtil";
 
-var LoadState = {
+export const LoadState = {
     init: 0,
     loading: 1,
     loaded: 2
 };
-var TextureElemType = {
+export const TextureElemType = {
     default: "UNSIGNED_BYTE",
     float: "FLOAT",
     halfFloat: "HALFFLOAT"
 };
 
-var TextureType = {
+export const TextureType = {
     default: "TEXTURE_2D",
     cube: "TEXTURE_CUBE_MAP"
 };
-var TextureFormat = {
+export const TextureFormat = {
     default: "RGBA",
     RGB: "RGB"
 };
 
-var TextureWrap = {
+export const TextureWrap = {
     default: "CLAMP_TO_EDGE",
     clamp_to_border: "CLAMP_TO_BORDER",
     repeat: "REPEAT"
 };
 
-var TextureUrl = {
+export const TextureUrl = {
     camera: "Camera",
     null: "null"
 };

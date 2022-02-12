@@ -4,7 +4,7 @@
  * @Date: 2020-02-02 11:13:23
  * @Description: file content
  */
-const Layout = { Default: 0, UseOwn: 1 };
+export const Layout = { Default: 0, UseOwn: 1 };
 
 class CanvasUtil {
     static initCanvas(canvasId, layout) {

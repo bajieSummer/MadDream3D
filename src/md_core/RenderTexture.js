@@ -6,7 +6,8 @@
  */
 
 import { Vector3, Vector4 } from "./MathUtil";
-import { Texture } from "./Texture";
+import { Texture, TextureType, TextureWrap, LoadState, TextureElemType } from "./Texture";
+import { TextureManager } from "./Material";
 
 class RenderTexture extends Texture {
     constructor(url, width, height, type) {

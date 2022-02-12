@@ -4,6 +4,7 @@
  * @Date: 2020-01-19 17:03:43
  * @Description: file content
  */
+import { UTypeEnumn } from "./Program";
 
 function TransformAni(/**@type {Scene} */scene,
     /**@type {Transform} */trans,

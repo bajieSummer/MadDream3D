@@ -14,7 +14,7 @@
 // step5: update v, pos
 //// 1 unit for 0.05m 
 // 0.2 (draw) -->1unit
-var Dimensions = {unit:0.9,peru:0.5,g:new Vector3(0.0,-9.8,0.0)};
+var Dimensions = {unit:0.9,peru:0.5,g:new Mad3D.Vector3(0.0,-9.8,0.0)};
 var STP = {mass:0.02,ks:20,kd:0.2,l0:0.12,isFixed:false};
 
 var SpPhyics = function(pos,v,isFixed,mass,ks,kd,l0){
@@ -36,7 +36,7 @@ function draw2Physics(pos,phPos){
    var peru = Dimensions.peru;
    var resPos = phPos;
    if(resPos === undefined) {
-      resPos = new Vector3();
+      resPos = new Mad3D.Vector3();
    }
    resPos.x = pos.x/unit*peru; 
    resPos.y = pos.y/unit*peru; 
@@ -48,7 +48,7 @@ function physics2Draw(pos,dPos){
    var peru = Dimensions.peru;
    var resPos = dPos;
    if(resPos === undefined) {
-      resPos = new Vector3();
+      resPos = new Mad3D.Vector3();
    }
    resPos.x = pos.x/peru*unit; 
    resPos.y = pos.y/peru*unit; 
@@ -58,15 +58,15 @@ function physics2Draw(pos,dPos){
 
 function createSpring(pos,scene,unit){
    var baseUrl = "../pics/MD3d_hello.png";      
-   var smesh = MeshUtil.createBox(unit*0.1,unit*0.1,unit*0.1);
-   var mat = SceneUtil.createMaterial(scene,{receiveLight:false,receiveShadow:false,
+   var smesh = Mad3D.MeshUtil.createBox(unit*0.1,unit*0.1,unit*0.1);
+   var mat = Mad3D.SceneUtil.createMaterial(scene,{receiveLight:false,receiveShadow:false,
       texture0:baseUrl});
-   var enti =SceneUtil.createEntity(scene,"box",
+   var enti =Mad3D.SceneUtil.createEntity(scene,"box",
       {mesh:smesh,material:mat
       });
    enti.transform.setPosition(pos.x,pos.y,pos.z);
    // 1 unit for 0.05m 
-   enti.physics = new SpPhyics(draw2Physics(pos),new Vector3(0.0,0.0,0.0),true);
+   enti.physics = new SpPhyics(draw2Physics(pos),new Mad3D.Vector3(0.0,0.0,0.0),true);
    var entiArr = [enti];
    
    for(var i = 1; i<10; i++){
@@ -75,7 +75,7 @@ function createSpring(pos,scene,unit){
       ct.transform.translate(i*d*0.5,(-d)*i,i*d*0.2);
       var phPos = draw2Physics(ct.transform.pos);
      // console.log("i=",i," phPos=",phPos," pos=",ct.transform.pos);
-      ct.physics = new SpPhyics(phPos,new Vector3(0.0,0.0,0.0),false);
+      ct.physics = new SpPhyics(phPos,new Mad3D.Vector3(0.0,0.0,0.0),false);
       entiArr.push(ct);
    }
    return entiArr;
@@ -89,45 +89,45 @@ function updateForces(i,entiArr){
    var phy1 =(i+1)<entiArr.length?entiArr[i+1].physics:null;
    //(entiArr.length-i)
   // var G = -1.0*phy.mass*g;
-  var G = MathUtil.V3MultiNum(Dimensions.g,phy.mass);
+  var G = Mad3D.MathUtil.V3MultiNum(Dimensions.g,phy.mass);
    
-   var F_air =MathUtil.V3MultiNum(phy.v,-0.5*1.0*1.293*0.01*MathUtil.getLength(phy.v));
+   var F_air =Mad3D.MathUtil.V3MultiNum(phy.v,-0.5*1.0*1.293*0.01*Mad3D.MathUtil.getLength(phy.v));
    //for up:
-   var upFp = new Vector3(0.0,0.0,0.0); var upFd = new Vector3(0.0,0.0,0.0);
+   var upFp = new Mad3D.Vector3(0.0,0.0,0.0); var upFd = new Mad3D.Vector3(0.0,0.0,0.0);
    if(phy0!==null){
-      var Xu = MathUtil.V3SubV3(phy0.pos,phy.pos);
-      var lenXu = MathUtil.getLength(Xu);
-      upFp =MathUtil.V3MultiNum(Xu,phy0.ks/lenXu*(lenXu-phy0.l0));
+      var Xu = Mad3D.MathUtil.V3SubV3(phy0.pos,phy.pos);
+      var lenXu = Mad3D.MathUtil.getLength(Xu);
+      upFp =Mad3D.MathUtil.V3MultiNum(Xu,phy0.ks/lenXu*(lenXu-phy0.l0));
       
      // upFd =phy0.kd*(phy0.v-phy.v)*Xu/lenXu;
-     upFd  = MathUtil.multiplyV3(Xu,MathUtil.V3SubV3(phy0.v,phy.v));
-     upFd = MathUtil.V3MultiNum(upFd,phy0.kd/lenXu);
+     upFd  = Mad3D.MathUtil.multiplyV3(Xu,Mad3D.MathUtil.V3SubV3(phy0.v,phy.v));
+     upFd = Mad3D.MathUtil.V3MultiNum(upFd,phy0.kd/lenXu);
    }
-   var dnFp = new Vector3(0.0,0.0,0.0); var dnFd = new Vector3(0.0,0.0,0.0);
+   var dnFp = new Mad3D.Vector3(0.0,0.0,0.0); var dnFd = new Mad3D.Vector3(0.0,0.0,0.0);
    if(phy1!==null){
-      var Xdn = MathUtil.V3SubV3(phy.pos,phy1.pos);
-      var lenXdn = MathUtil.getLength(Xdn);
+      var Xdn = Mad3D.MathUtil.V3SubV3(phy.pos,phy1.pos);
+      var lenXdn = Mad3D.MathUtil.getLength(Xdn);
       //dnFp =-1.0*phy.ks*Xdn/lenXdn*(lenXdn-phy.l0);
       //dnFd =-1.0*phy.kd*(phy.v-phy1.v)*Xdn/lenXdn;
-      dnFp = MathUtil.V3MultiNum(Xdn,-1.0*phy.ks/lenXdn*(lenXdn-phy.l0));
-      dnFd = MathUtil.multiplyV3(Xdn,MathUtil.V3SubV3(phy.v,phy1.v));
-      dnFd = MathUtil.V3MultiNum(dnFd,-1.0*phy.kd/lenXdn);
+      dnFp = Mad3D.MathUtil.V3MultiNum(Xdn,-1.0*phy.ks/lenXdn*(lenXdn-phy.l0));
+      dnFd = Mad3D.MathUtil.multiplyV3(Xdn,Mad3D.MathUtil.V3SubV3(phy.v,phy1.v));
+      dnFd = Mad3D.MathUtil.V3MultiNum(dnFd,-1.0*phy.kd/lenXdn);
 
    }
   // console.log("i=",i," upFp =",upFp, " upFd=",upFd, " dnFp=",dnFp," dnFd=",dnFd," F_air=",F_air);
    //upFd,,dnFd
-   return MathUtil.V3ADDV3(upFp,upFd,dnFp,dnFd,G,F_air);
+   return Mad3D.MathUtil.V3ADDV3(upFp,upFd,dnFp,dnFd,G,F_air);
 }
 
 function updatePosV(dt,F,i,entiArr){
    var phy = entiArr[i].physics;
    if(phy.isFixed) return;
    
-   var a = MathUtil.V3MultiNum(F,1.0/phy.mass);
+   var a = Mad3D.MathUtil.V3MultiNum(F,1.0/phy.mass);
    // phy.v += a*dt;
    //phy.pos.y +=phy.v*dt; 
-   phy.v = MathUtil.V3ADDV3(phy.v,MathUtil.V3MultiNum(a,dt));
-   phy.pos = MathUtil.V3ADDV3(phy.pos,MathUtil.V3MultiNum(phy.v,dt));
+   phy.v = Mad3D.MathUtil.V3ADDV3(phy.v,Mad3D.MathUtil.V3MultiNum(a,dt));
+   phy.pos = Mad3D.MathUtil.V3ADDV3(phy.pos,Mad3D.MathUtil.V3MultiNum(phy.v,dt));
   // console.log("i=",i," f=",F," a=",a," v=",phy.v," y =",phy.pos);
 }
 
@@ -146,7 +146,7 @@ function updateSpring(dt,spring){
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
    
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
     var spr = createSpring({x:0,y:2,z:0},ds.scene,Dimensions.unit);
@@ -164,7 +164,7 @@ function initScene(){
       var lasttime = null;
     ds.scene.registerFrameCalls(function(){
 
-    },FrameState.BeforeDraw);
+    },Mad3D.FrameState.BeforeDraw);
    //  ds.scene.ambientLight = new Vector3(0.02,0.02,0.02);
    //  //light
    //  var lt = ds.dirLight;
@@ -183,19 +183,19 @@ function initScene(){
       var de = 1.0*0.0014*power*anp/spr[id].physics.mass;
       var dv =null; 
       if(axis[0] ==="z"){
-         dv = new Vector3(0,0,de);
+         dv = new Mad3D.Vector3(0,0,de);
       }else{
-         dv = new Vector3(de,0,0);
+         dv = new Mad3D.Vector3(de,0,0);
       }
-      spr[id].physics.v =  MathUtil.V3ADDV3(spr[id].physics.v,dv);
+      spr[id].physics.v =  Mad3D.MathUtil.V3ADDV3(spr[id].physics.v,dv);
   });
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
    });
 
-   var pMesh  = MeshUtil.createBox(10,0.2,10);
-   var enti = SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
+   var pMesh  = Mad3D.MeshUtil.createBox(10,0.2,10);
+   var enti = Mad3D.SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
       receiveLight:true,receiveShadow:false,matColor:[0.3,0.4,0.4,1.0]
    });
    enti.transform.setPosition(0,-1.5,0);
