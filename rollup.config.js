@@ -21,7 +21,7 @@ export default [
         plugins: [addShader()],
         output: {
             file: 'dist/maddream.js',
-            name: 'Mad',
+            name: 'Mad3D',
             format: 'iife',
         },
     },
@@ -30,7 +30,7 @@ export default [
         plugins: [addShader(), uglify()],
         output: {
             file: 'dist/maddream.min.js',
-            name: 'Mad',
+            name: 'Mad3D',
             format: 'iife',
         },
     }

@@ -7,8 +7,10 @@
 
 import { SceneUtil } from "./SceneUtil";
 import { CameraUtil } from "./CameraUtil";
-import { Vector3, MathUtil } from "./MathUtil";
+import { Vector3, MathUtil, MDBrowser } from "./MathUtil";
 import { RenderMask } from "./Render";
+import { RenderTexture } from "./RenderTexture";
+import { TextureType, TextureElemType } from "./Texture";
 
 class IBLUtil {
 

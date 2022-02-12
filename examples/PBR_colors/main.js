@@ -16,19 +16,19 @@ function norml(start,end,value){
 function createPBREntity(rows,columns,scene){
    var isPBR = true;
    var ft = 0.2;
-   var mat_diff = new Vector3(23.47*ft, 21.31*ft, 20.79*ft);
+   var mat_diff = new Mad3D.Vector3(23.47*ft, 21.31*ft, 20.79*ft);
    var stepi = 1.0/rows;
    var stepj = 1.0/columns;
    var space = 0.9;
    var initx = 3.0; inity =2.8;
    console.log("rough from left to right,metal from bottom to top");
-   var smesh = MeshUtil.createSphere(1.0,80,80);
+   var smesh = Mad3D.MeshUtil.createSphere(1.0,80,80);
    for (var i=0; i<rows; i++){
       for (var j=0;j<columns; j++){
          var rough = norml(0.09,1.0,j*stepj);
          var metal = i*stepi;
          console.log("createPBREntity varying:",i,j,rough,metal);
-         var enti1 =SceneUtil.createEntity(scene,"sphere"+i,
+         var enti1 =Mad3D.SceneUtil.createEntity(scene,"sphere"+i,
             {mesh:smesh,receiveLight:true,receiveShadow:false,gammaCorrect:true,matColor:[0.1, 0.01, 0.5,1.0],
             roughness:rough,metalness:metal,PBR:isPBR,diffuse:mat_diff});
             enti1.transform.setPosition(space*j-initx,space*i-inity,0.0);
@@ -41,24 +41,24 @@ function createPBREntity(rows,columns,scene){
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:true});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:true});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.scene.ambientLight = new Vector3(0.03,0.03,0.03);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.03,0.03,0.03);
     //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(1.0,1.0,1.0);
+    lt.color = new Mad3D.Vector3(1.0,1.0,1.0);
     //lt.color = new Vector3(5.0,5.0,5.0);
-    lt.specular = new Vector3(1.0,1.0,1.0);
+    lt.specular = new Mad3D.Vector3(1.0,1.0,1.0);
 
-    var lt2 = LightUtil.createShadowLight(0,0,new Vector3(2,-2,2),false,true);
+    var lt2 = Mad3D.LightUtil.createShadowLight(0,0,new Mad3D.Vector3(2,-2,2),false,true);
     ds.scene.addLight(lt2);
 
-    var lt3 = LightUtil.createShadowLight(0,0,new Vector3(-2,2,2),false,true);
+    var lt3 = Mad3D.LightUtil.createShadowLight(0,0,new Mad3D.Vector3(-2,2,2),false,true);
     ds.scene.addLight(lt3);
 
-    var lt4 = LightUtil.createShadowLight(0,0,new Vector3(-2,-2,2),false,true);
+    var lt4 = Mad3D.LightUtil.createShadowLight(0,0,new Mad3D.Vector3(-2,-2,2),false,true);
     ds.scene.addLight(lt4);
 
 
@@ -98,7 +98,7 @@ function initScene(){
 
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     

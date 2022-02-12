@@ -7,7 +7,7 @@
 
  RGBEParser = function (type  ) {
 	if(type ===undefined){
-		this.type = TextureElemType.default;
+		this.type = Mad3D.TextureElemType.default;
 	}
 	this.type = type;
 };
@@ -399,13 +399,13 @@ RGBEParser.prototype = {
 
 				switch ( this.type ) {
 
-					case TextureElemType.default:
+					case Mad3D.TextureElemType.default:
 
 						var data = image_rgba_data;
 					
 						break;
 
-					case TextureElemType.float:
+					case Mad3D.TextureElemType.float:
 
 						var numElements = ( image_rgba_data.length / 4 ) * 3;
 						var floatArray = new Float32Array( numElements );
@@ -419,7 +419,7 @@ RGBEParser.prototype = {
 						var data = floatArray;
 						break;
 
-					case TextureElemType.halfFloat:
+					case Mad3D.TextureElemType.halfFloat:
 
 						var numElements = ( image_rgba_data.length / 4 ) * 3;
 						var halfArray = new Uint16Array( numElements );

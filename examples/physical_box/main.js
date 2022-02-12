@@ -21,15 +21,15 @@ class PhysicalPartice{
       if (params === undefined) {
          params = {};
       }
-      this.gravity = params.gravity===undefined ?new Vector3(0.0,-10.0,0.0):params.gravity;
+      this.gravity = params.gravity===undefined ?new Mad3D.Vector3(0.0,-10.0,0.0):params.gravity;
       this.mass = params.mass === undefined ?30:params.mass;
       this.k = params.k === undefined ?7:params.k;
-      this.anchor = params.anchor === undefined ?new Vector3(0.0,40,0.0):params.anchor;
+      this.anchor = params.anchor === undefined ?new Mad3D.Vector3(0.0,40,0.0):params.anchor;
       this.damp = params.damp === undefined ?5:params.damp;
       console.log("anchor=",this.anchor);
     
       // this.positionY = params.positionY === undefined ?100:params.positionY;
-      this.velocity = params.velocity === undefined ?new Vector3(0.0,0.0,0.0):params.velocity;
+      this.velocity = params.velocity === undefined ?new Mad3D.Vector3(0.0,0.0,0.0):params.velocity;
       this.timestep = params.timestep === undefined ?0.28:params.timestep;
       this.updateHandler = null;
       this.isKinematic =false;
@@ -86,7 +86,7 @@ class PhysicalPartice{
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
    
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
    // ds.camera.transform.setPosition(0,0,-100);
@@ -101,18 +101,18 @@ function initScene(){
    console.log("n=",ds.camera.near,"f=",ds.camera.far,"fov=",ds.camera.fov,"asp=",ds.camera.asp);
 
    // interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){ 
    });
-   var particleM = MeshUtil.createBox(10,10,10);
+   var particleM = Mad3D.MeshUtil.createBox(10,10,10);
 
-   var anchor = SceneUtil.createEntity(ds.scene,"anchor",
+   var anchor = Mad3D.SceneUtil.createEntity(ds.scene,"anchor",
    {mesh:particleM,receiveLight:false,receiveShadow:false,matColor:[1.0,1.0,0.0,1.0]});
-   ds.resetPos = new Vector3(20,81,0);
+   ds.resetPos = new Mad3D.Vector3(20,81,0);
    anchor.transform.setPosition(0,0,0);
    ds.scene.addEntity(anchor);
    
 
-   var particle = SceneUtil.createEntity(ds.scene,"box",{mesh:particleM,
+   var particle = Mad3D.SceneUtil.createEntity(ds.scene,"box",{mesh:particleM,
       receiveLight:true,receiveShadow:false,matColor:[0.2,1.0,0.2,1.0]});
    
    particle.transform.setPosition(ds.resetPos.x,ds.resetPos.y,ds.resetPos.z);
@@ -124,9 +124,9 @@ function initScene(){
    
    
 
-var pMesh  = MeshUtil.createBox(1000,0.0,1000);
+var pMesh  = Mad3D.MeshUtil.createBox(1000,0.0,1000);
 
-   var enti = SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
+   var enti = Mad3D.SceneUtil.createEntity(ds.scene,"ground",{mesh:pMesh,
       receiveLight:false,receiveShadow:false,matColor:[0.9,0.3,0.5,1.0]
    });
   

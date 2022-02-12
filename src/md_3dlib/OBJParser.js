@@ -634,11 +634,11 @@ var OBJParser = function () {
 				//geometry.uvs
 				/**@type {Mesh} */
 
-				var mesh = Mad.Mesh.createFromArray(geometry.vertices.length / 3.0, geometry.vertices, geometry.colors);
+				var mesh = Mad3D.Mesh.createFromArray(geometry.vertices.length / 3.0, geometry.vertices, geometry.colors);
 				mesh.vertexNormal = geometry.normals;
 				mesh.uv = geometry.uvs;
 
-				mesh.setPrimitiveType(Mad.PrimitiveType.Triangular);
+				mesh.setPrimitiveType(Mad3D.PrimitiveType.Triangular);
 
 				// Create materials
 
@@ -654,7 +654,7 @@ var OBJParser = function () {
 						createdMaterials.push(material);
 					}
 
-					var enti = Mad.SceneUtil.createEntity(scene, object.name, {
+					var enti = Mad3D.SceneUtil.createEntity(scene, object.name, {
 						mesh: mesh, receiveLight: true,
 					});
 					container.push(enti);

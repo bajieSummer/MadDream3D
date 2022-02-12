@@ -31,7 +31,7 @@ function responseToMouse(
         var tc = ev.touches[0];
         var x = tc.clientX/window.clientWidth;
         var y = tc.clientY/window.clientHeight;
-        mdg.mat.setUniform("u_mouse",UTypeEnumn.Vec2,[x,y]);
+        mdg.mat.setUniform("u_mouse",Mad3D.UTypeEnumn.Vec2,[x,y]);
         //mdg.scene.requireUpdate();
         //scene.require
        // console.log(x,y);
@@ -41,7 +41,7 @@ function responseToMouse(
 
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -56,12 +56,12 @@ var mdg = {};
 
 function addTexs(mat,texsArr){
     for(var i=0;i<texsArr.length;i++){
-        var tex = MaterialUtil.createTextureFromOps(texsArr[i]);
+        var tex = Mad3D.MaterialUtil.createTextureFromOps(texsArr[i]);
         if(i===0||i===1){
-            tex.wrap_mode = TextureWrap.repeat;
+            tex.wrap_mode = Mad3D.TextureWrap.repeat;
         }
         
-        mat.setUniform("texture"+i,UTypeEnumn.texture,tex);
+        mat.setUniform("texture"+i,Mad3D.UTypeEnumn.texture,tex);
         mat.addTexture(tex);
     }
     
@@ -81,18 +81,18 @@ function initScene(){
     // create Mesh:
     //var mesh =createSqModelMesh();
     //var mesh = MeshUtil.createColorBox();
-    var mesh = MeshUtil.createPlane(3,3,2.0);
+    var mesh = Mad3D.MeshUtil.createPlane(3,3,2.0);
  // var mesh =  MeshUtil.createCameraPlane(cam);
     /**@type {Material} */
-    var material = MaterialUtil.createFromShader(vsSource,fsSource);
-    material.setUniform("u_mouse",UTypeEnumn.Vec2,[0.0,1.0]);
+    var material = Mad3D.MaterialUtil.createFromShader(vsSource,fsSource);
+    material.setUniform("u_mouse",Mad3D.UTypeEnumn.Vec2,[0.0,1.0]);
     var path = "../pics/fire_simple/";
     addTexs(material,[path+"fire01.jpg",path+"noise01.jpg",path+"alpha01.jpg"]);
     //console.log("resolution",w,h);
    // material.setUniform("u_resolution",UTypeEnumn.Vec2,[w,h]);
     mdg.mat = material;
     //var ets = [];
-    var entity = new Entity("t1");
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     //entity.transform.setPosition(0,0,6);
@@ -104,7 +104,7 @@ function initScene(){
     var ets = [];
     ets.push(entity);
 
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     mdg.scene = scene;
     //scene.clearColor = [0.2,0.3,0.4,1.0];
     scene.addCamera(cam);
@@ -112,7 +112,7 @@ function initScene(){
     scene.entityList = ets;
     scene.gl = gl;
     var p2 = {utime:1000.0};
-    var m2 = ValueAni(
+    var m2 = Mad3D.ValueAni(
     {
         targets: p2,
         utime:1.0,
@@ -122,7 +122,7 @@ function initScene(){
         autoplay:true,
         update: function(anim) {
            // console.log(p2.utime);
-            material.setUniform("utime",UTypeEnumn.float,p2.utime);
+            material.setUniform("utime",Mad3D.UTypeEnumn.float,p2.utime);
         }
     });
     return scene;

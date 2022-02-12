@@ -16,7 +16,7 @@ function norml(start,end,value){
 function createPBREntity(rows,columns,scene){
    var isPBR = true;
    var ft = 1.3;
-   var mat_diff = new Vector3(23.47*ft, 21.31*ft, 20.79*ft);
+   var mat_diff = new Mad3D.Vector3(23.47*ft, 21.31*ft, 20.79*ft);
   // var mat_diff = new Vector3(1.0, 1.0, 1.0);
    var stepi = 1.0/rows;
    var stepj = 1.0/columns;
@@ -27,7 +27,7 @@ function createPBREntity(rows,columns,scene){
          var rough = norml(0.09,1.0,j*stepj);
          var metal = i*stepi;
          console.log("createPBREntity varying:",i,j,rough,metal);
-         var enti1 =SceneUtil.createEntity(scene,"sphere"+i,
+         var enti1 =Mad3D.SceneUtil.createEntity(scene,"sphere"+i,
             {receiveLight:true,receiveShadow:false,hdrExposure:1.0,gammaCorrect:true,matColor:[0.5,0.0,0.0,1.0],
             roughness:rough,metalness:metal,PBR:isPBR,diffuse:mat_diff});
             enti1.transform.setPosition(space*j-initx,space*i-inity,0.0);
@@ -47,16 +47,16 @@ function createCubeUrls(pf,et){
 
 function initScene(){
    //default scene
-    var ds = SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
+    var ds = Mad3D.SceneUtil.createDefaultScene("sipc",{hasSkyBox:false,castShadow:false});
     var w = ds.scene.gl.canvas.width; var h = ds.scene.gl.canvas.height;
     console.log("canvas width="+w+"canvas height="+h);
     ds.camera.clearColor = [0.0,0.0,0.0,1.0];
-    ds.scene.ambientLight = new Vector3(0.02,0.02,0.02);
+    ds.scene.ambientLight = new Mad3D.Vector3(0.02,0.02,0.02);
     //light
     var lt = ds.dirLight;
-    lt.color = new Vector3(1.0,1.0,1.0);
+    lt.color = new Mad3D.Vector3(1.0,1.0,1.0);
     //lt.color = new Vector3(5.0,5.0,5.0);
-    lt.specular = new Vector3(1.0,1.0,1.0);
+    lt.specular = new Mad3D.Vector3(1.0,1.0,1.0);
     var gl = ds.scene.gl;
 
    //  var lt2 = LightUtil.createShadowLight(0,0,new Vector3(-4,4,4),false,true);
@@ -84,7 +84,7 @@ function initScene(){
 
     var isPBR = true;
      var ft = 0.001;
-     var mat_diff = new Vector3(23.47*ft, 21.31*ft, 20.79*ft);
+     var mat_diff = new Mad3D.Vector3(23.47*ft, 21.31*ft, 20.79*ft);
    //var mat_diff = new Vector3(0.01, 1, 1.0);
    // var folder = "../pics/rusticMetal1/";
    //var folder = "../pics/steelplate1/";
@@ -97,7 +97,7 @@ function initScene(){
     var aoUrl = folder+"ao.png";
     var heightUrl = folder+"height.png";
     var martx= "../pics/mars_1k_color.jpg";
-    var smesh = MeshUtil.createSphere(1,100,100,true);
+    var smesh = Mad3D.MeshUtil.createSphere(1,100,100,true);
     //var smesh = MeshUtil.createBox(3,3,2,true);
    // var pf = "../pics/cube/bridge/";
    
@@ -116,7 +116,7 @@ function initScene(){
    //     gammaCorrect:true,hdrExposure:1.0
    //    });
 
-      var enti1 =SceneUtil.createEntity(ds.scene,"sphere",
+      var enti1 =Mad3D.SceneUtil.createEntity(ds.scene,"sphere",
       {mesh:smesh,receiveLight:true,receiveShadow:false,
          matColor:[0.97, 0.96, 0.91,1.0],PBR:true,
          diffuse:mat_diff,metalness:0.2,roughness:0.2,
@@ -157,7 +157,7 @@ function initScene(){
    
 
     //interaction
-   InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
+   Mad3D.InteractUtil.registerCameraMove(ds.camera,ds.scene.gl.canvas,function(trans){
        
    });
     

@@ -6,7 +6,7 @@
  */
 function initCamera(asp){
     console.log("camera,asp:",asp);
-    var cam = new Camera();
+    var cam = new Mad3D.Camera();
     /**@type {Transform} */
     var transform  = cam.transform;
     cam.setFov(45);
@@ -20,8 +20,8 @@ function initCamera(asp){
 var mdg = {};
 
 function createSkyBox(){
-    var mesh = MeshUtil.createBox(1,1,1);
-    var shaderOps = new ShaderOption();
+    var mesh = Mad3D.MeshUtil.createBox(1,1,1);
+    var shaderOps = new Mad3D.ShaderOption();
     shaderOps.depthTest = false;
     shaderOps.depthWrite = false;
     shaderOps.cullFace = "FRONT";
@@ -30,8 +30,8 @@ function createSkyBox(){
                         pf+"negy.jpg",pf+"posz.jpg",pf+"negz.jpg"
                       
                         ];
-    var material = MaterialUtil.createFromShaderOption(shaderOps);
-    var entity = new Entity("skybox");
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps);
+    var entity = new Mad3D.Entity("skybox");
     entity.mesh = mesh;
     entity.material = material;
    // entity.transform.rotate(0,0,0);
@@ -42,14 +42,14 @@ function createSkyBox(){
 }
 function createLights(scene){
     // directionLight
-    var dlt = new DirectionLight();
+    var dlt = new Mad3D.DirectionLight();
     //dlt.color = new Vector3(1.0,1.0,1.0);
     dlt.transform.setPosition(2.0,2.0,2.0);
     //dlt.transform.setPosition(-2.0,-2.0,0.0);
     //dlt.specular = new Vector3(0.9,0.9,0.9);
 
     //pointLight
-    var dlt2 = new PointLight();
+    var dlt2 = new Mad3D.PointLight();
     //dlt2.color = new Vector3(1.0,1.0,1.0);
     dlt2.transform.setPosition(-3.0,0.0,0.0);
     dlt2.constant = 0.95;
@@ -60,18 +60,18 @@ function createLights(scene){
     scene.dirLights.push(dlt);
    scene.pointLights = [];
     //scene.pointLights.push(dlt2);
-    scene.ambientLight = new Vector3(0.3,0.3,0.3);
+    scene.ambientLight = new Mad3D.Vector3(0.3,0.3,0.3);
 
 }
 
 function createEntity(scene){
     //var mesh = MeshUtil.createPlane(2,2,0);
-    var mesh = MeshUtil.createSphere(1,20,20);
+    var mesh = Mad3D.MeshUtil.createSphere(1,20,20);
    //var mesh = MeshUtil.createDoughnuts(1.3,2.0);
    // var mesh = MeshUtil.createTaper(1.2,0.7,6);
   // var mesh = MeshUtil.createBox(2,2,2);
 
-    var shaderOps = new ShaderOption();
+    var shaderOps = new Mad3D.ShaderOption();
     
      
      //shaderOps.vertexColor = true;
@@ -81,8 +81,8 @@ function createEntity(scene){
      // shaderOps.texture0 ="../pics/earthmap1k.jpg";
 
     //shaderOps.texture0 = "../pics/mars_1k_color.jpg";
-      shaderOps.diffuse = new Vector3(0.5,0.5,0.5);
-      shaderOps.specular = new Vector3(0.8,0.8,0.8);
+      shaderOps.diffuse = new Mad3D.Vector3(0.5,0.5,0.5);
+      shaderOps.specular = new Mad3D.Vector3(0.8,0.8,0.8);
      shaderOps.shininess = 10.0;
      shaderOps.dirLightCount = scene.dirLights.length;
      shaderOps.pointLightCount =scene.pointLights.length; 
@@ -91,9 +91,9 @@ function createEntity(scene){
     // console.log(shaderOps.dirLightCount,shaderOps.pointLightCount);
  
      /**@type {Material} */
-     var material = MaterialUtil.createFromShaderOption(shaderOps,scene);
+     var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps,scene);
      
-     var entity = new Entity("t2");
+     var entity = new Mad3D.Entity("t2");
      entity.mesh = mesh;
      entity.material = material;
      entity.transform.setPosition(1.5,0,0);
@@ -104,16 +104,16 @@ function createEntity(scene){
  }
 
 function createHdrEntity(scene,tex,ratio){
-    var mesh = MeshUtil.createPlane(2*ratio,2,0);
-    var shaderOps = new ShaderOption();
+    var mesh = Mad3D.MeshUtil.createPlane(2*ratio,2,0);
+    var shaderOps = new Mad3D.ShaderOption();
     //shaderOps.matColor = [0.0,1.0,1.0,1.0];
     shaderOps.matColor = [1.0,1.0,1.0,1.0];
     //shaderOps.texture0 = "../pics/memorial.hdr";
     shaderOps.texture0 =tex;//"../pics/earthmap1k.jpg";
     shaderOps.hdrExposure = 2.0;
     /**@type {Material} */
-    var material = MaterialUtil.createFromShaderOption(shaderOps,scene);
-    var entity = new Entity("t1");
+    var material = Mad3D.MaterialUtil.createFromShaderOption(shaderOps,scene);
+    var entity = new Mad3D.Entity("t1");
     entity.mesh = mesh;
     entity.material = material;
     entity.transform.setPosition(-1.5,0.5,0);
@@ -122,7 +122,7 @@ function createHdrEntity(scene,tex,ratio){
 
 function initScene(){
     /**@type {WebGLRenderingContext} */
-    var gl = CanvasUtil.initCanvas("sipc");
+    var gl = Mad3D.CanvasUtil.initCanvas("sipc");
     gl.canvas.width = gl.canvas.clientWidth*2.0;
     gl.canvas.height = gl.canvas.clientHeight*2.0;
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
@@ -141,7 +141,7 @@ function initScene(){
     var w = gl.canvas.width;
     var h = gl.canvas.height;
     var asp  = w/h;
-    var cgLayer = RenderLayer.default+1;
+    var cgLayer = Mad3D.RenderLayer.default+1;
     var cam = initCamera(asp);
     cam.name = "main";
     //cam.renderMask = RenderMask.layers;
@@ -150,13 +150,13 @@ function initScene(){
     cam2.depth = 30;
     cam2.name = "texcam";
     /**@type {RenderTexture} */
-    var rt = new RenderTexture("Camera",w,h);
-    rt.elType = TextureElemType.float;
+    var rt = new Mad3D.RenderTexture("Camera",w,h);
+    rt.elType = Mad3D.TextureElemType.float;
     cam2.renderTarget = rt;
-    cam2.renderMask =RenderMask.layers;
-    cam2.addRenderLayer(RenderLayer.default);
+    cam2.renderMask =Mad3D.RenderMask.layers;
+    cam2.addRenderLayer(Mad3D.RenderLayer.default);
     //create scene
-    var scene = new Scene();
+    var scene = new Mad3D.Scene();
     scene.clearColor = [0.5,0.5,0.5,1.0];
     createLights(scene);
     scene.addCamera(cam2);
@@ -174,9 +174,9 @@ function initScene(){
     //ent1.transform.rotate(0,0,180);
     ent1.setRenderLayer(cgLayer);
     scene.addEntity(ent1);
-    var initPos = new Vector3(cam.transform.pos.x,cam.transform.pos.y,cam.transform.pos.z);
-    cam.transform.rotOrder = RotationOrder.zyx;
-    InteractUtil.registerMovehandler(gl.canvas,cam.transform,[360,45],function(tf){
+    var initPos = new Mad3D.Vector3(cam.transform.pos.x,cam.transform.pos.y,cam.transform.pos.z);
+    cam.transform.rotOrder = Mad3D.RotationOrder.zyx;
+    Mad3D.InteractUtil.registerMovehandler(gl.canvas,cam.transform,[360,45],function(tf){
         var r = Math.sqrt(initPos.x*initPos.x +initPos.y*initPos.y + initPos.z*initPos.z);
         var cita = tf.rot.x*Math.PI/180.0;
         tf.pos.y = -1.0*r*Math.sin(cita);
@@ -188,7 +188,7 @@ function initScene(){
     });
     scene.gl = gl;
     var mat = ent1.material;
-    var m2 = MaterialAni(scene,mat,"hdrExposure",
+    var m2 = Mad3D.MaterialAni(scene,mat,"hdrExposure",
         {
             targets: mat.shaderOption,
             hdrExposure: 10.0,
@@ -201,7 +201,7 @@ function initScene(){
             }
         });
     var tf = ent2.transform;
-    var m1 = TransformAni(scene,tf,{
+    var m1 = Mad3D.TransformAni(scene,tf,{
             targets: tf.pos,
             z: -10,
             duration: 2000,

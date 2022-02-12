@@ -156,13 +156,13 @@ class Transform {
         var len = Math.sqrt(dx * dx + dy * dy + dz * dz);
         var citax = 0;
         var citay = 0;
-        if (len < Epsilon) {
+        if (len < MathUtil.Epsilon) {
             return;
         }
         var ndx = dx / len; var ndy = dy / len; var ndz = dz / len;
         citax = -1.0 * Math.asin(ndy) * 180.0 / Math.PI;
         var r = Math.sqrt(ndx * ndx + ndz * ndz);
-        if (r < Epsilon) {
+        if (r < MathUtil.Epsilon) {
             citay = 0.0;
         } else {
             citay = Math.asin(ndx / r) * 180.0 / Math.PI;
@@ -184,7 +184,7 @@ class Transform {
         var len = Math.sqrt(dx * dx + dy * dy + dz * dz);
         var citax = 0;
         var citay = 0;
-        if (len < Epsilon) {
+        if (len < MathUtil.Epsilon) {
             return;
         }
         var ndx = dx / len; var ndy = dy / len; var ndz = dz / len;
@@ -192,7 +192,7 @@ class Transform {
         citax = citard * 180.0 / Math.PI;
         var r = len * Math.cos(citard);// Math.sqrt(ndx*ndx +ndz*ndz);
 
-        if (Math.abs(r) < Epsilon) {
+        if (Math.abs(r) < MathUtil.Epsilon) {
             citay = 0.0;
         } else {
             citay = Math.atan(dx / dz) * 180.0 / Math.PI;

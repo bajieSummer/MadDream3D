@@ -12,7 +12,7 @@ class ClothSpring
             params = {};
          }
          // 100 9.1 8.5
-         this.gravity = params.gravity===undefined ?new Vector3(0.0,-10.0,0.0):params.gravity;
+         this.gravity = params.gravity===undefined ?new Mad3D.Vector3(0.0,-10.0,0.0):params.gravity;
          this.mass = params.mass === undefined ?100:params.mass;
          this.kbd = params.kbd === undefined ?8:params.kbd;
          this.dbd = params.dbd === undefined ?5:params.dbd;
