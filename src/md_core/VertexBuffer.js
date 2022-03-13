@@ -9,11 +9,12 @@ import { AttributeType } from "./Program";
 
 function SingleBufferParam(
     /**@type {WebGLBuffer}*/id,
-    type, perVertexSize) {
+    elementCount, type, perVertexSize) {
     /**@type {WebGLBuffer} */
     this.id = id;
     /**@type {mode} */
     this.type = type;
+    this.elementCount = elementCount;
     this.perVertexSize = perVertexSize; // per iteration for x,y
     this.normalize = false;
     this.stride = 0;
@@ -36,7 +37,7 @@ class VertexBuffer {
     static createBufferParam(
         /**@type {WebGLRenderingContext} */gl,
         /**@type {Array}*/Arr,
-        vertexCount,
+        elementCount,
         vType,
         bufType) {
         var bufId = gl.createBuffer();
@@ -52,19 +53,21 @@ class VertexBuffer {
             return null;
         }
         gl.bufferData(bufType, glArr, gl.STATIC_DRAW);
-        var vertexNums = Arr.length / vertexCount;
-        return new SingleBufferParam(bufId, vType, vertexNums);
+        var vertexNums = Arr.length / elementCount;
+        return new SingleBufferParam(bufId, elementCount, vType, vertexNums);
     }
 
     static addInfoToVB(/**@type {WebGLRenderingContext} */gl,
         /**@type {VertexBufferInfo}*/vBInfo,
         /**@type {Array}*/Arr,
+        elementCount,
         /**@type {string}*/key,
         vType, bufType) {
-        if (Arr instanceof (Array)) {
+        if (Arr instanceof (Array) || Arr instanceof Uint16Array
+            || Arr instanceof Float32Array) {
             AttributeType.types[key] = true;
             vBInfo[key] = VertexBuffer.createBufferParam(gl,
-                Arr, vBInfo.vertexCount, vType, bufType);
+                Arr, elementCount, vType, bufType);
             return true;
         } else {
             console.log("addInfoToVB error: infoName=" + key, " Arr type should be Array not", typeof (Arr));
@@ -77,14 +80,14 @@ class VertexBuffer {
         /**@type {VertexBufferInfo}*/vBInfo,
         /**@type {Array}*/posArr) {
         return VertexBuffer.addInfoToVB(gl, vBInfo,
-            posArr, "vertexPos", gl.FLOAT, gl.ARRAY_BUFFER);
+            posArr, vBInfo.vertexCount, "vertexPos", gl.FLOAT, gl.ARRAY_BUFFER);
     }
 
     static addColor(/**@type {WebGLRenderingContext} */gl,
          /**@type {VertexBufferInfo}*/vBInfo,
          /**@type {Array}*/colorArr) {
         return VertexBuffer.addInfoToVB(gl, vBInfo,
-            colorArr, "vertexColor", gl.FLOAT, gl.ARRAY_BUFFER);
+            colorArr, vBInfo.vertexCount, "vertexColor", gl.FLOAT, gl.ARRAY_BUFFER);
 
     }
 
@@ -92,7 +95,7 @@ class VertexBuffer {
         /**@type {VertexBufferInfo}*/vBInfo,
          /**@type {Array}*/indicesArr) {
         return VertexBuffer.addInfoToVB(gl, vBInfo,
-            indicesArr, "vertexIndices", gl.UNSIGNED_SHORT, gl.ELEMENT_ARRAY_BUFFER);
+            indicesArr, indicesArr.length, "vertexIndices", gl.UNSIGNED_SHORT, gl.ELEMENT_ARRAY_BUFFER);
     }
 
 

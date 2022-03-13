@@ -131,7 +131,7 @@ class Render {
         var indices = buffers.vertexIndices;
         if (indices !== (null && undefined) && indices.id !== (null && undefined)) {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices.id);
-            gl.drawElements(buffers.primitiveType, vertexCount * indices.perVertexSize, indices.type, 0);
+            gl.drawElements(buffers.primitiveType, indices.elementCount * indices.perVertexSize, indices.type, 0);
         } else {
             gl.drawArrays(buffers.primitiveType, 0, vertexCount);
         }
