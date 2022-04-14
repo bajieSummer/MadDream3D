@@ -86,6 +86,7 @@ class Mesh {
                     gl,
                     this.vertexBufferInfo,
                     this.uv,
+                    this.vertexCount,
                     "uv",
                     gl.FLOAT,
                     gl.ARRAY_BUFFER
@@ -96,19 +97,21 @@ class Mesh {
                     gl,
                     this.vertexBufferInfo,
                     this.vertexNormal,
+                    this.vertexCount,
                     "vertexNormal",
                     gl.FLOAT,
                     gl.ARRAY_BUFFER
                 );
             }
             if (this.vertexIndices !== null) {
-                VertexBuffer.addIndices(gl, this.vertexBufferInfo, this.vertexIndices);
+                VertexBuffer.addIndices(gl, this.vertexBufferInfo, this.vertexIndices, this.vertexIndices.length);
             }
             if (this.vertexTangent !== null) {
                 VertexBuffer.addInfoToVB(
                     gl,
                     this.vertexBufferInfo,
                     this.vertexTangent,
+                    this.vertexCount,
                     "vertexTangent",
                     gl.FLOAT,
                     gl.ARRAY_BUFFER
