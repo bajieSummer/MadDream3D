@@ -49,7 +49,7 @@ class VertexBuffer {
         } else if (vType === gl.UNSIGNED_SHORT) {
             glArr = new Uint16Array(Arr);
         } else {
-            console.error("createBufferParam:error:unspported vertex type:", type);
+            console.error("createBufferParam:error:unspported vertex type:", vType);
             return null;
         }
         gl.bufferData(bufType, glArr, gl.STATIC_DRAW);
